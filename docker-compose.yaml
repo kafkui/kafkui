@@ -1,0 +1,107 @@
+version: "2"
+
+services:
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.7
+    volumes:
+      - "zookeeper_data:/bitnami"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka_01:
+    image: docker.io/bitnami/kafka:3
+    ports:
+      - "9193:9193"
+    volumes:
+      - "kafka_01:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9193
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka_01:9092,EXTERNAL://localhost:9193
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+    depends_on:
+      - zookeeper
+
+  kafka_02:
+    image: docker.io/bitnami/kafka:3
+    ports:
+      - "9293:9293"
+    volumes:
+      - "kafka_02:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9293
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka_02:9092,EXTERNAL://localhost:9293
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+    depends_on:
+      - zookeeper
+
+  kafka_03:
+    image: docker.io/bitnami/kafka:3
+    ports:
+      - "9393:9393"
+    volumes:
+      - "kafka_03:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9393
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka_03:9092,EXTERNAL://localhost:9393
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+    depends_on:
+      - zookeeper
+
+  kafka_04:
+    image: docker.io/bitnami/kafka:3
+    ports:
+      - "9493:9493"
+    volumes:
+      - "kafka_04:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9493
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka_04:9092,EXTERNAL://localhost:9493
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+    depends_on:
+      - zookeeper
+
+  kafka_05:
+    image: docker.io/bitnami/kafka:3
+    ports:
+      - "9593:9593"
+    volumes:
+      - "kafka_05:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9593
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka_05:9092,EXTERNAL://localhost:9593
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=false
+    depends_on:
+      - zookeeper
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_01:
+    driver: local
+  kafka_02:
+    driver: local
+  kafka_03:
+    driver: local
+  kafka_04:
+    driver: local
+  kafka_05:
+    driver: local

@@ -1,0 +1,3 @@
+== Install graalvm
+
+brew install --cask graalvm/tap/graalvm-ce-java17
