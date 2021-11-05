@@ -24,11 +24,17 @@ public class Application  {
 
     private final static Logger log = LoggerFactory.getLogger(Application.class.getName());
 
-
     public static void main(String[] args) throws Exception {
 
-
         log.info("Starting app's");
+
+        // Set a default handler to log all exceptions
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            org.slf4j.Logger log = LoggerFactory.getLogger(Application.class);
+            log.error("Uncaugh error", e);
+        });
+
+
         try (Terminal terminal = TerminalBuilder.builder().build();
              Display display = new Display(terminal)) {
 
@@ -82,19 +88,6 @@ public class Application  {
 
 
 //            terminal.flush();
-
-
-//
-//
-//            Display display = new Display(terminal, true);
-//            display.resize(terminal.getWidth(), terminal.getHeight());
-//            display.clear();
-//            display.update(Collections.emptyList(), terminal.getSize().cursorPos(10,10));
-//            display.
-           // System.out.println(terminal.getSize());
-
-
-        //System.out.println((char)27 + "[31m" + "ERROR MESSAGE IN RED");
     }
 
 
@@ -121,7 +114,7 @@ public class Application  {
     public enum Operation {
         UP,
         EXIT,
-        SEARCH, DOWN, NONE;
+        SEARCH, DOWN, NONE
     }
 
 

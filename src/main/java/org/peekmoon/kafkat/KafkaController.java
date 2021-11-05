@@ -13,7 +13,7 @@ public class KafkaController {
 
     public KafkaController() {
         Properties config = new Properties();
-        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
+        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
         client = AdminClient.create(config);
     }
 

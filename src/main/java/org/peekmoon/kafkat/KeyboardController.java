@@ -26,7 +26,7 @@ public class KeyboardController implements Runnable {
         keyMap.setAmbiguousTimeout(200);
         keyMap.setNomatch(Application.Operation.NONE);
         keyMap.bind(Application.Operation.SEARCH, "/");
-        keyMap.bind(Application.Operation.EXIT, ":", KeyMap.esc());
+        keyMap.bind(Application.Operation.EXIT, "q", KeyMap.esc());
         keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
         keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
         this.queue = queue;
@@ -36,11 +36,11 @@ public class KeyboardController implements Runnable {
     @Override
     public void run() {
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             Application.Operation op = bindingReader.readBinding(keyMap);
             log.info("Receiving a new operation {}", op);
             if (op != Application.Operation.NONE) queue.add(op);
-
         }
 
     }

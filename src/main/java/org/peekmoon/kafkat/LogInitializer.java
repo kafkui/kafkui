@@ -1,15 +1,11 @@
 package org.peekmoon.kafkat;
 
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.*;
 
 public class LogInitializer {
-
-
 
     public static void init() {
 
@@ -34,12 +30,6 @@ public class LogInitializer {
             }
             rootLogger.setLevel(defaultLevel);
             rootLogger.addHandler(logHandler);
-
-            // Set a default handler to log all exceptions
-            Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-                org.slf4j.Logger log = LoggerFactory.getLogger(Application.class);
-                log.error("Uncuahg error", e);
-            });
 
         } catch (IOException e) {
             throw new IllegalStateException(e);
