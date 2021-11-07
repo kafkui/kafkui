@@ -134,7 +134,7 @@ public class Application  {
         // TODO : Should always be included in a root ?
         //scrollLayout = new ScrollLayout(table.getLayout());
 
-        return table;
+        return new FrameLayout(table);
     }
 
 

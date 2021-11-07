@@ -9,9 +9,6 @@ public class ConstrainedSizeLayout extends InnerLayout {
     private int minHeight, maxHeight;
     private int width, height;
 
-    private AttributedStringBuilder emptyLine;
-
-
     private final InnerLayout inner;
 
     public ConstrainedSizeLayout(InnerLayout inner) {
@@ -65,7 +62,7 @@ public class ConstrainedSizeLayout extends InnerLayout {
     public AttributedStringBuilder render(int y) {
 
         if (y>=maxHeight) {
-            return emptyLine;
+            return emptyLine();
         }
 
         var innerLine = inner.render(y);
@@ -89,8 +86,6 @@ public class ConstrainedSizeLayout extends InnerLayout {
 
         height = Math.max(height, minHeight);
         height = Math.min(height, maxHeight);
-
-        emptyLine = new AttributedStringBuilder().append(" ".repeat(width));
     }
 
 }

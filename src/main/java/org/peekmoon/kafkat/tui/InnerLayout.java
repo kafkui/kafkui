@@ -6,10 +6,6 @@ public abstract class InnerLayout implements Layout {
 
     private Layout parent;
 
-    protected AttributedStringBuilder emptyLine(int width) {
-        return new AttributedStringBuilder().append(" ".repeat(width));
-    }
-
     @Override
     public void invalidate() {
         getParent().invalidate();
@@ -27,6 +23,14 @@ public abstract class InnerLayout implements Layout {
             throw new IllegalStateException("Parent has not been initialized for " + this);
         }
         return parent;
+    }
+
+    protected AttributedStringBuilder emptyLine() {
+        return emptyLine(getWidth());
+    }
+
+    protected AttributedStringBuilder emptyLine(int width) {
+        return new AttributedStringBuilder().append(" ".repeat(width));
     }
 
 }

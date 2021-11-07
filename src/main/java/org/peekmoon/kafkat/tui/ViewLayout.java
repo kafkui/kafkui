@@ -1,7 +1,6 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
-import org.jline.utils.AttributedStyle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class ViewLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
-        // Unable to resize : ignoring event
+        // ignoring event
     }
 
     @Override

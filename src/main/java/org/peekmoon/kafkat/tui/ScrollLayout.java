@@ -9,7 +9,6 @@ public class ScrollLayout extends InnerLayout {
 
     private int width, height;
     private int offsetX, offsetY;
-    private AttributedStringBuilder emptyLine;
 
 
     public ScrollLayout(InnerLayout virtualLayout) {
@@ -47,7 +46,6 @@ public class ScrollLayout extends InnerLayout {
         virtualLayout.resize(width, height);
         this.width = Math.min(virtualLayout.getWidth(), width);
         this.height = Math.min(virtualLayout.getHeight(), height);
-        emptyLine = new AttributedStringBuilder().append(" ".repeat(this.width));
         if (offsetY + this.height > virtualLayout.getHeight()) { // Stay inside when becoming bigger
             offsetY = virtualLayout.getHeight() - height;
         }
@@ -56,7 +54,7 @@ public class ScrollLayout extends InnerLayout {
     @Override
     public AttributedStringBuilder render(int y) {
         if (y + offsetY >= virtualLayout.getHeight()) {
-            return emptyLine;
+            return emptyLine();
         }
         return virtualLayout.render(y + offsetY);
     }

@@ -4,8 +4,6 @@ import org.jline.utils.AttributedStringBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public class StackLayout extends InnerLayout {
 
@@ -18,7 +16,7 @@ public class StackLayout extends InnerLayout {
 
     @Override
     public int getHeight() {
-        return inners.stream().mapToInt(Layout::getHeight).max().getAsInt();
+        return inners.stream().mapToInt(Layout::getHeight).max().orElse(0);
     }
 
     @Override
