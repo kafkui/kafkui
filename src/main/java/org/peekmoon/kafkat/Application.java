@@ -4,16 +4,16 @@ import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
+import org.peekmoon.kafkat.tui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class Application  {
@@ -36,17 +36,11 @@ public class Application  {
 
 
         try (Terminal terminal = TerminalBuilder.builder().build();
-             Display display = new Display(terminal)) {
+             Display display = new Display(terminal, buildLayout())) {
 
             KafkaController kafkaController = new KafkaController();
 
             BlockingQueue<Operation> actionQueue = new LinkedBlockingDeque<>();
-            BlockingQueue<Void> invalidate = new LinkedBlockingDeque<>(1);
-
-            TopcisView model = new TopcisView(display, 20, 5);
-            kafkaController.update(model);
-
-            display.add(model);
 
 
             Thread t = new Thread(new KeyboardController(terminal, actionQueue));
@@ -64,8 +58,8 @@ public class Application  {
                 log.info("Receiving an new action {}", op);
                 switch (op) {
                     case EXIT -> askQuit = true;
-                    case UP -> model.selectUp();
-                    case DOWN -> model.selectDown();
+                    case UP -> table.selectUp();
+                    case DOWN -> table.selectDown();
                 }
             }
 
@@ -88,6 +82,59 @@ public class Application  {
 
 
 //            terminal.flush();
+    }
+
+    static Table table;
+
+    private static InnerLayout buildLayout() {
+        ViewLayout leftView = new ViewLayout();
+//        leftView.addItem("Test1");
+//        leftView.addItem("Test2 plu long");
+//        leftView.addItem("T");
+//        leftView.addItem("");
+//        leftView.addItem("*****************************************|");
+//        leftView.addItem("123456");
+        for (int i=0; i<20;i++) {
+            leftView.addItem(String.format("%2d: ", i) + UUID.randomUUID());
+        }
+        leftView.addItem("-----------");
+
+
+        ViewLayout rightView = new ViewLayout();
+        rightView.addItem("Right View");
+        for (int i=0; i<20;i++) {
+            rightView.addItem("Repeat after me!!é&");
+        }
+
+        ViewLayout rrightView = new ViewLayout();
+        rrightView.addItem("Exterme View");
+        for (int i=0; i<20;i++) {
+            rrightView.addItem(String.format("%2d: ", i) + UUID.randomUUID());
+        }
+
+
+//        stack.add(leftView);
+//        stack.add(rightView);
+//        stack.add(rrightView);
+
+
+        table = new Table();
+        table.addColumn("Id");
+        table.addColumn("name");
+        table.addColumn("status");
+        for (int i=0; i<66;i++) {
+            table.addRow(
+                    String.format("<%2d: ", i) + UUID.randomUUID() + ">",
+                    "<" + "bla".repeat(ThreadLocalRandom.current().nextInt(6) + 1) + ">",
+                    String.format("<%2d: A droite : ", i) + UUID.randomUUID() + ">"
+            );
+        }
+
+
+        // TODO : Should always be included in a root ?
+        //scrollLayout = new ScrollLayout(table.getLayout());
+
+        return table;
     }
 
 

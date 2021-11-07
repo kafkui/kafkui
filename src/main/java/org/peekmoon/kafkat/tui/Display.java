@@ -1,14 +1,16 @@
-package org.peekmoon.kafkat;
+package org.peekmoon.kafkat.tui;
 
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
+import org.jline.utils.AttributedCharSequence;
 import org.jline.utils.AttributedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -29,10 +31,12 @@ public class Display implements Runnable, Closeable {
     private final org.jline.utils.Display display;
 
     private final Size size = new Size();
-    private View view;
+    private final RootLayout layout;
 
-    public Display(Terminal terminal) {
+    public Display(Terminal terminal, InnerLayout layout) {
         this.terminal = terminal;
+        this.layout = new RootLayout(this, layout);
+
         this.askStop = new AtomicBoolean(false);
         this.invalidate = new LinkedBlockingQueue(1);
 
@@ -43,7 +47,6 @@ public class Display implements Runnable, Closeable {
         terminal.puts(cursor_invisible);
         terminal.puts(enter_ca_mode);
         terminal.puts(keypad_xmit);
-        terminal.puts(cursor_invisible);
         terminal.flush();
 
         resize(Terminal.Signal.WINCH);
@@ -54,6 +57,7 @@ public class Display implements Runnable, Closeable {
         size.copy(terminal.getSize());
         display.resize(size.getRows(), size.getColumns());
         display.clear();
+        layout.resize(size.getColumns(), size.getRows());
         invalidate();
     }
 
@@ -88,7 +92,8 @@ public class Display implements Runnable, Closeable {
                 if (invalidate.poll(200, TimeUnit.MILLISECONDS) != null) {
                     log.info("starting draw");
                     synchronized (this) {
-                        log.debug("aquired");
+                        log.debug("draw lock aquired");
+                        display.reset(); // FIXME : Workaround : https://github.com/jline/jline3/issues/737
                         List<AttributedString> lines = render();
                         display.update(lines, 0);
                     }
@@ -101,8 +106,11 @@ public class Display implements Runnable, Closeable {
     }
 
     private List<AttributedString> render() {
-
-        return view.render();
+        List<AttributedString> result = new ArrayList<>();
+        for (int y=0; y<layout.getHeight(); y++) {
+            result.add(layout.render(y).toAttributedString());
+        }
+        return result;
     }
 
     @Override
@@ -118,11 +126,6 @@ public class Display implements Runnable, Closeable {
         terminal.close();
     }
 
-
-
-    public void add(View view) {
-        this.view = view;
-    }
 
     // Use a queue allow to have only one drawing at a time and aggragate all ask
     public void invalidate() {

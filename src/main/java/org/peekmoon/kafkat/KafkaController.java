@@ -46,7 +46,7 @@ public class KafkaController {
     }
 
     private Void update(TopcisView model, String name, Config description) {
-        model.update(name, description);
+        // model.update(name, description);
         return null;
     }
 }
