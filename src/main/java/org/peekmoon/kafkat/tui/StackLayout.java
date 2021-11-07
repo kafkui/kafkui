@@ -25,7 +25,6 @@ public class StackLayout extends InnerLayout {
     public void resize(int width, int height) {
         // TODO : For now only all same size
         // TODO : For now only horizontal stack
-        // TODO : For now all inners of same size
         int innerWidth = width / inners.size();
         inners.forEach(l -> l.resize(innerWidth , height));
     }
