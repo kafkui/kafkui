@@ -2,8 +2,13 @@ package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ConstrainedSizeLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(ConstrainedSizeLayout.class);
+
 
     private int minWidth, maxWidth;
     private int minHeight, maxHeight;
@@ -56,6 +61,7 @@ public class ConstrainedSizeLayout extends InnerLayout {
         enforceConstraints();
 
         inner.resize(this.width, this.height);
+        log.debug("Resized : {}", this);
     }
 
     @Override
@@ -88,5 +94,13 @@ public class ConstrainedSizeLayout extends InnerLayout {
         height = Math.min(height, maxHeight);
     }
 
+
+    @Override
+    public String toString() {
+        return super.toString() + " over [" + inner.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + "] {" +
+                minWidth + "<w<" + maxWidth + " " +
+                minHeight + "<h<" + maxHeight +
+                '}';
+    }
 }
 

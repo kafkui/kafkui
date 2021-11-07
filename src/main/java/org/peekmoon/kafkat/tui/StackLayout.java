@@ -1,11 +1,15 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StackLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(StackLayout.class);
 
     private List<InnerLayout> inners = new ArrayList<>();
 
@@ -25,6 +29,7 @@ public class StackLayout extends InnerLayout {
         // TODO : For now only horizontal stack
         int innerWidth = width / inners.size();
         inners.forEach(l -> l.resize(innerWidth , height));
+        log.debug("Resized : {}", this);
     }
 
     @Override

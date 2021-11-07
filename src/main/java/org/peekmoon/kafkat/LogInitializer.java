@@ -31,6 +31,8 @@ public class LogInitializer {
             rootLogger.setLevel(defaultLevel);
             rootLogger.addHandler(logHandler);
 
+            Logger.getLogger("org.peekmoon").setLevel(Level.ALL);
+
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

@@ -1,8 +1,13 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FrameLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(FrameLayout.class);
+
 
     private final InnerLayout inner;
 
@@ -24,6 +29,7 @@ public class FrameLayout extends InnerLayout {
     @Override
     public void resize(int width, int height) {
         inner.resize(width-2, height-2);
+        log.debug("Resized : {}", this);
     }
 
     @Override
@@ -32,5 +38,10 @@ public class FrameLayout extends InnerLayout {
             return new AttributedStringBuilder().append("*".repeat(getWidth()));
         }
         return new AttributedStringBuilder().append("*").append(inner.render(y-1)).append("*");
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " over [" + inner.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + "]";
     }
 }

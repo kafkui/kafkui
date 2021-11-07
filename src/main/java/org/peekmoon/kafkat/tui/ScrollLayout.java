@@ -1,9 +1,13 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //TODO : Managed Horizontal scrolling
 public class ScrollLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(ScrollLayout.class);
 
     private final Layout virtualLayout;
 
@@ -49,6 +53,7 @@ public class ScrollLayout extends InnerLayout {
         if (offsetY + this.height > virtualLayout.getHeight()) { // Stay inside when becoming bigger
             offsetY = virtualLayout.getHeight() - height;
         }
+        log.debug("Resized : {}", this);
     }
 
     @Override

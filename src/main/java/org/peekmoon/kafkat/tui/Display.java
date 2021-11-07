@@ -53,12 +53,13 @@ public class Display implements Runnable, Closeable {
     }
 
     private synchronized void resize(Terminal.Signal signal) {
-        log.info("resize");
+        log.info("Resizing");
         size.copy(terminal.getSize());
         display.resize(size.getRows(), size.getColumns());
         display.clear();
         layout.resize(size.getColumns(), size.getRows());
         invalidate();
+        log.info("Resize done");
     }
 
 
@@ -90,12 +91,12 @@ public class Display implements Runnable, Closeable {
         try {
             while (!askStop.get()) {
                 if (invalidate.poll(200, TimeUnit.MILLISECONDS) != null) {
-                    log.info("starting draw");
                     synchronized (this) {
-                        log.debug("draw lock aquired");
+                        log.info("Drawing...");
                         display.reset(); // FIXME : Workaround : https://github.com/jline/jline3/issues/737
                         List<AttributedString> lines = render();
                         display.update(lines, 0);
+                        log.info("Draw done");
                     }
                 }
             }
@@ -127,7 +128,7 @@ public class Display implements Runnable, Closeable {
     }
 
 
-    // Use a queue allow to have only one drawing at a time and aggragate all ask
+    // Use a queue allow to have only one drawing at a time and aggragate all requests
     public void invalidate() {
         invalidate.offer("dummy"); // TODO : Think to a better event management
     }

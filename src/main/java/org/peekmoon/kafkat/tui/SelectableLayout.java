@@ -2,8 +2,12 @@ package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SelectableLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(SelectableLayout.class);
 
     private final InnerLayout inner;
     private Integer selectedOffset;
@@ -43,6 +47,7 @@ public class SelectableLayout extends InnerLayout {
     @Override
     public void resize(int width, int height) {
         inner.resize(width, height);
+        log.debug("Resized : {}", this);
     }
 
     @Override

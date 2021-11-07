@@ -1,11 +1,15 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ViewLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(ViewLayout.class);
 
     private final List<AttributedStringBuilder> sequences;
     private int width;
@@ -29,7 +33,7 @@ public class ViewLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
-        // ignoring event
+        log.debug("Resized : {}", this);
     }
 
     @Override

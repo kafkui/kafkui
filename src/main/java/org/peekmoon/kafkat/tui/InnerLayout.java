@@ -33,4 +33,8 @@ public abstract class InnerLayout implements Layout {
         return new AttributedStringBuilder().append(" ".repeat(width));
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + "[" + getWidth() + "," + getHeight() + "]";
+    }
 }

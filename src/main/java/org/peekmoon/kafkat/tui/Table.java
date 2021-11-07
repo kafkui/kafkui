@@ -1,11 +1,16 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Table extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(Table.class);
+
 
     private final ScrollLayout scrollLayout;
     private final SelectableLayout selectableLayout;
@@ -61,6 +66,7 @@ public class Table extends InnerLayout {
     public void resize(int width, int height) {
         scrollLayout.resize(width, height);
         scrollLayout.makeVisible(selectableLayout.getSelectedOffet());
+        log.debug("Resized : {}", this);
     }
 
     @Override
