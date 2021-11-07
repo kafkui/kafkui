@@ -45,15 +45,12 @@ public class ScrollLayout extends InnerLayout {
     @Override
     public void resize(int width, int height) {
         virtualLayout.resize(width, height);
-        this.width = width; //Math.min(virtualLayout.getWidth(), width);
-        this.height = height; //Math.min(virtualLayout.getHeight(), height);
+        this.width = Math.min(virtualLayout.getWidth(), width);
+        this.height = Math.min(virtualLayout.getHeight(), height);
         emptyLine = new AttributedStringBuilder().append(" ".repeat(this.width));
-        if (offsetY + height > virtualLayout.getHeight()) { // We have a blank space at bottom
-            // TODO : Limit scroll layout to be little as virtual layout
+        if (offsetY + this.height > virtualLayout.getHeight()) { // Stay inside when becoming bigger
             offsetY = virtualLayout.getHeight() - height;
-            if (offsetY < 0) offsetY = 0;
         }
-
     }
 
     @Override
