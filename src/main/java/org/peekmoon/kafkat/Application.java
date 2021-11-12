@@ -18,11 +18,12 @@ public class Application  {
 
     private final static Logger log = LoggerFactory.getLogger(Application.class.getName());
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
         new Application().run();
     }
 
+    private SwitchLayout switchLayout;
     private TopicsPage topicsPage;
     private ConsumersPage consumersPage;
 
@@ -64,6 +65,17 @@ public class Application  {
                 log.info("Receiving an new action {}", op);
                 switch (op) {
                     case EXIT -> askQuit = true;
+                    case SWITCH_TO_CONSUMER -> {
+
+                        currentPage = consumersPage;
+                        switchLayout.switchTo("CONSUMERS");
+                        currentPage.activate();
+                    }
+                    case SWITCH_TO_TOPICS -> {
+                        currentPage = topicsPage;
+                        switchLayout.switchTo("TOPICS");
+                        currentPage.activate();
+                    }
                 }
                 currentPage.process(op);
             }
@@ -107,7 +119,10 @@ public class Application  {
         this.consumersPage = new ConsumersPage();
 
 
-        return new FrameLayout(topicsPage.getTable());
+        this.switchLayout = new SwitchLayout();
+        switchLayout.add("TOPICS", topicsPage.getTable());
+        switchLayout.add("CONSUMERS", consumersPage.getTable());
+        return new FrameLayout(switchLayout);
         //return new FrameLayout(topicsView.getTable());
 
 
@@ -117,7 +132,11 @@ public class Application  {
     public enum Operation {
         UP,
         EXIT,
-        SEARCH, DOWN, NONE
+        SEARCH,
+        DOWN,
+        NONE,
+        SWITCH_TO_TOPICS,
+        SWITCH_TO_CONSUMER
     }
 
 

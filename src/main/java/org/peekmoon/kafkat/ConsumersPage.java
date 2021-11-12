@@ -1,5 +1,6 @@
 package org.peekmoon.kafkat;
 
+import org.peekmoon.kafkat.tui.InnerLayout;
 import org.peekmoon.kafkat.tui.Page;
 import org.peekmoon.kafkat.tui.Table;
 
@@ -10,6 +11,10 @@ public class ConsumersPage implements Page {
     public ConsumersPage() {
         this.table = new Table();
         table.addColumn("groupId");
+    }
+
+    public InnerLayout getTable() {
+        return table;
     }
 
     public void add(String name, String policy) {
@@ -32,4 +37,6 @@ public class ConsumersPage implements Page {
             case DOWN -> table.selectDown();
         }
     }
+
+
 }

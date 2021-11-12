@@ -21,6 +21,7 @@ public class SwitchLayout extends InnerLayout {
             throw new IllegalArgumentException("Unknown layout " + name);
         }
         currentLayout = child;
+        invalidate();
     }
 
     @Override
@@ -31,7 +32,6 @@ public class SwitchLayout extends InnerLayout {
     @Override
     public int getHeight() {
         return currentLayout.getHeight();
-
     }
 
     @Override
