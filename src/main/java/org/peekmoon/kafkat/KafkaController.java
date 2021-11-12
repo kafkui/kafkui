@@ -13,13 +13,14 @@ public class KafkaController {
 
     public KafkaController() {
         Properties config = new Properties();
+        //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
         config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
         client = AdminClient.create(config);
     }
 
 
-    public void update(TopcisView model) {
-        client.listTopics().listings().thenApply(t -> update(model, t));
+    public void update(TopicsPage view) {
+        client.listTopics().listings().thenApply(t -> update(view, t));
 
         /*
         var topicDescription = admin.describeTopics(topicsList).all().get(); // TODO : Replace par un value and async reply to terminal
@@ -35,18 +36,37 @@ public class KafkaController {
 
     }
 
-    private Void update(TopcisView model, Collection<TopicListing> topics) {
+    public void update(ConsumersPage view) {
+        client.listConsumerGroups().all().thenApply(c -> update(view, c));
+    }
+
+    private Void update(ConsumersPage view, Collection<ConsumerGroupListing> consumers) {
+        var groupeIds = consumers.stream().map(c -> c.groupId()).collect(Collectors.toList());
+        client.describeConsumerGroups(groupeIds)
+                .describedGroups().values()
+                .forEach((descriptionFuture -> descriptionFuture.thenApply(description -> update(view, description))));
+        return null;
+    }
+
+    private Void update(ConsumersPage view, ConsumerGroupDescription description) {
+        view.add(description.groupId());
+        return null;
+    }
+
+
+    private Void update(TopicsPage view, Collection<TopicListing> topics) {
 
         var topicsConfig = topics.stream()
                 .map(t -> new ConfigResource(ConfigResource.Type.TOPIC, t.name()))
                 .collect(Collectors.toSet());
         client.describeConfigs(topicsConfig).values()
-                .forEach((configResource, f) -> f.thenApply(conf -> update(model, configResource.name(), conf)));
+                .forEach((configResource, f) -> f.thenApply(conf -> update(view, configResource.name(), conf)));
         return null;
     }
 
-    private Void update(TopcisView model, String name, Config description) {
-        // model.update(name, description);
+    private Void update(TopicsPage model, String name, Config description) {
+        model.add(name, description.get("cleanup.policy").value());
+
         return null;
     }
 }

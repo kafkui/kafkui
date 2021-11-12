@@ -1,20 +1,14 @@
 package org.peekmoon.kafkat;
 
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.NewTopic;
-import org.jline.terminal.Terminal;
+ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.peekmoon.kafkat.tui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 public class Application  {
 
@@ -25,6 +19,14 @@ public class Application  {
     private final static Logger log = LoggerFactory.getLogger(Application.class.getName());
 
     public static void main(String[] args) throws Exception {
+
+        new Application().run();
+    }
+
+    private TopicsPage topicsPage;
+    private ConsumersPage consumersPage;
+
+    public void run() {
 
         log.info("Starting app's");
 
@@ -38,19 +40,23 @@ public class Application  {
         try (Terminal terminal = TerminalBuilder.builder().build();
              Display display = new Display(terminal, buildLayout())) {
 
-            KafkaController kafkaController = new KafkaController();
-
             BlockingQueue<Operation> actionQueue = new LinkedBlockingDeque<>();
 
-
-            Thread t = new Thread(new KeyboardController(terminal, actionQueue));
-            t.setDaemon(true);
-            t.start();
+            // TODO : Better implementation as the action queue. The display thread should be using the action queue ?
+            Thread keyboardThread = new Thread(new KeyboardController(terminal, actionQueue));
+            keyboardThread.setDaemon(true);
+            keyboardThread.start();
 
             Thread displayThread = new Thread(display);
+            displayThread.setDaemon(true);
             displayThread.start();
 
+            KafkaController kafkaController = new KafkaController();
+            kafkaController.update(topicsPage);
+            kafkaController.update(consumersPage);
 
+
+            Page currentPage = topicsPage;
             boolean askQuit = false;
             while (!askQuit){
 
@@ -58,13 +64,12 @@ public class Application  {
                 log.info("Receiving an new action {}", op);
                 switch (op) {
                     case EXIT -> askQuit = true;
-                    case UP -> table.selectUp();
-                    case DOWN -> table.selectDown();
                 }
+                currentPage.process(op);
             }
 
 
-        } catch (IOException  e) {
+        } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
         }
 
@@ -84,75 +89,30 @@ public class Application  {
 //            terminal.flush();
     }
 
-    static Table table;
+    private InnerLayout buildLayout() {
 
-    private static InnerLayout buildLayout() {
-        ViewLayout leftView = new ViewLayout();
-//        leftView.addItem("Test1");
-//        leftView.addItem("Test2 plu long");
-//        leftView.addItem("T");
-//        leftView.addItem("");
-//        leftView.addItem("*****************************************|");
-//        leftView.addItem("123456");
-        for (int i=0; i<20;i++) {
-            leftView.addItem(String.format("%2d: ", i) + UUID.randomUUID());
-        }
-        leftView.addItem("-----------");
+//        table = new Table();
+//        table.addColumn("Id");
+//        table.addColumn("name");
+//        table.addColumn("status");
+//        for (int i=0; i<66;i++) {
+//            table.addRow(
+//                    String.format("<%2d: ", i) + UUID.randomUUID() + ">",
+//                    "<" + "bla".repeat(ThreadLocalRandom.current().nextInt(6) + 1) + ">",
+//                    String.format("<%2d: A droite : ", i) + UUID.randomUUID() + ">"
+//            );
+//        }
 
-
-        ViewLayout rightView = new ViewLayout();
-        rightView.addItem("Right View");
-        for (int i=0; i<20;i++) {
-            rightView.addItem("Repeat after me!!é&");
-        }
-
-        ViewLayout rrightView = new ViewLayout();
-        rrightView.addItem("Exterme View");
-        for (int i=0; i<20;i++) {
-            rrightView.addItem(String.format("%2d: ", i) + UUID.randomUUID());
-        }
+        this.topicsPage = new TopicsPage();
+        this.consumersPage = new ConsumersPage();
 
 
-//        stack.add(leftView);
-//        stack.add(rightView);
-//        stack.add(rrightView);
+        return new FrameLayout(topicsPage.getTable());
+        //return new FrameLayout(topicsView.getTable());
 
 
-        table = new Table();
-        table.addColumn("Id");
-        table.addColumn("name");
-        table.addColumn("status");
-        for (int i=0; i<66;i++) {
-            table.addRow(
-                    String.format("<%2d: ", i) + UUID.randomUUID() + ">",
-                    "<" + "bla".repeat(ThreadLocalRandom.current().nextInt(6) + 1) + ">",
-                    String.format("<%2d: A droite : ", i) + UUID.randomUUID() + ">"
-            );
-        }
-
-        return new FrameLayout(table);
     }
 
-
-
-    private static void buildTestTopics(AdminClient admin) throws InterruptedException, ExecutionException {
-        //admin.deleteTopics(testTopics().stream().map(t->t.name()).collect(Collectors.toList())).all().get();
-        Set<String> existingTopics = admin.listTopics().names().get();
-        var topicsToBuild = testTopics().stream().filter(n->!existingTopics.contains(n.name())).collect(Collectors.toList());
-        var topicResult = admin.createTopics(topicsToBuild);
-        topicResult.all().get();
-    }
-
-    private static Collection<NewTopic> testTopics() {
-        return List.of(
-                new NewTopic("simple", 1, (short) 1),
-                new NewTopic("cities", 10, (short) 3),
-                new NewTopic("blabla.envet", 3, (short) 3),
-                new NewTopic("supercharger", 1, (short) 2),
-                new NewTopic("castratorine", 10, (short) 2),
-                new NewTopic("glouton", 25, (short) 5)
-                );
-    }
 
     public enum Operation {
         UP,

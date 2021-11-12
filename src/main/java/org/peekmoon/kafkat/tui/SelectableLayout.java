@@ -10,12 +10,11 @@ public class SelectableLayout extends InnerLayout {
     private final static Logger log = LoggerFactory.getLogger(SelectableLayout.class);
 
     private final InnerLayout inner;
-    private Integer selectedOffset;
+    private int selectedOffset;
 
     public SelectableLayout(InnerLayout inner) {
         this.inner = inner;
         inner.setParent(this);
-        this.selectedOffset = 3;
     }
 
     public int selectUp() {

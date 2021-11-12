@@ -50,6 +50,7 @@ public class Table extends InnerLayout {
         for (int noCol = 0; noCol<columns.size(); noCol++) {
             columns.get(noCol).addItem(cols[noCol]);
         }
+        invalidate();
     }
 
     @Override

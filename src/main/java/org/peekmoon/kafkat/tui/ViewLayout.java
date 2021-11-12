@@ -42,6 +42,7 @@ public class ViewLayout extends InnerLayout {
     }
 
 
+    // TODO : Synchronize with rezising and drawing
     public void addItem(String item) {
         var line = new AttributedStringBuilder().append(item);
 
