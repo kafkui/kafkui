@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import static org.jline.terminal.TerminalBuilder.PROP_DISABLE_ALTERNATE_CHARSET;
+
 public class Application  {
 
     static {
@@ -36,6 +38,10 @@ public class Application  {
             org.slf4j.Logger log = LoggerFactory.getLogger(Application.class);
             log.error("Uncaugh error", e);
         });
+
+
+        // Workaround terminal with TERM=screen-256color display bad frame border
+        System.setProperty(PROP_DISABLE_ALTERNATE_CHARSET, "true");
 
 
         try (Terminal terminal = TerminalBuilder.builder().build();

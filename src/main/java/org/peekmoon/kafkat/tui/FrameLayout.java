@@ -8,6 +8,13 @@ public class FrameLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(FrameLayout.class);
 
+    private static final String HORIZONTAL_CHAR = "─"; // 0x2500
+    private static final String VERTICAL_CHAR =  "│";// 0x2502
+    private static final String TOP_LEFT_CHAR =  "┌"; //  0x250C
+    private static final String TOP_RIGNT_CHAR =  "┐"; // 0x2510
+    private static final String BOTTOM_LEFT_CHAR =  "└"; // 0x2514
+    private static final String BOTTOM_RIGHT_CHAR =  "┘"; // 0x2518
+
 
     private final InnerLayout inner;
 
@@ -32,12 +39,22 @@ public class FrameLayout extends InnerLayout {
         log.debug("Resized : {}", this);
     }
 
+
     @Override
     public AttributedStringBuilder render(int y) {
-        if (y == 0 || y == getHeight()-1) {
-            return new AttributedStringBuilder().append("*".repeat(getWidth()));
+        if (y == 0) {
+            return new AttributedStringBuilder()
+                    .append(TOP_LEFT_CHAR)
+                    .append(HORIZONTAL_CHAR.repeat(getWidth()-2))
+                    .append(TOP_RIGNT_CHAR);
         }
-        return new AttributedStringBuilder().append("*").append(inner.render(y-1)).append("*");
+        if (y == getHeight()-1) {
+            return new AttributedStringBuilder()
+                    .append(BOTTOM_LEFT_CHAR)
+                    .append(HORIZONTAL_CHAR.repeat(getWidth()-2))
+                    .append(BOTTOM_RIGHT_CHAR);
+        }
+        return new AttributedStringBuilder().append(VERTICAL_CHAR).append(inner.render(y-1)).append(VERTICAL_CHAR);
     }
 
     @Override
