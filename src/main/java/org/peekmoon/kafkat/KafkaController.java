@@ -3,6 +3,7 @@ package org.peekmoon.kafkat;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.config.ConfigResource;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -21,27 +22,38 @@ public class KafkaController {
 
     public void update(TopicsPage view) {
         client.listTopics().listings().thenApply(t -> update(view, t));
-
-        /*
-        var topicDescription = admin.describeTopics(topicsList).all().get(); // TODO : Replace par un value and async reply to terminal
-        topicDescription.values().stream()
-                .forEach(td -> writer.write(td.topicId().toString() + '\t' + td.name() + '\n'));
-        //.flatMap(td -> td.partitions().stream())
-        //.forEach(pd -> writer.write("\t\t" + pd.partition() + '\n'));
-
-        writer.write("Node\n");
-        admin.describeCluster().nodes().get().forEach(n -> writer.write(n.id() + "--" + n.port() + "\n"));
-
-         */
-
     }
+
+
+    private Void update(TopicsPage view, Collection<TopicListing> topics) {
+        var configResourceList = new ArrayList<ConfigResource>();
+        var topicsName = new ArrayList<String>();
+        for (TopicListing topic : topics) {
+            String topicName = topic.name();
+            view.addTopic(topicName);
+            configResourceList.add(new ConfigResource(ConfigResource.Type.TOPIC, topicName));
+            topicsName.add(topicName);
+        }
+
+        client.describeConfigs(configResourceList).values()
+                .forEach((configResource, f) -> f.thenApply(conf -> view.setConfig(configResource.name(), conf)));
+
+        client.describeTopics(topicsName).values()
+                .forEach((topicName, f) -> f.thenApply(view::setDescription));
+
+        return null;
+    }
+
+
+    ///////////////////
+    // Consumer part
 
     public void update(ConsumersPage view) {
         client.listConsumerGroups().all().thenApply(c -> update(view, c));
     }
 
     private Void update(ConsumersPage view, Collection<ConsumerGroupListing> consumers) {
-        var groupeIds = consumers.stream().map(c -> c.groupId()).collect(Collectors.toList());
+        var groupeIds = consumers.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
         client.describeConsumerGroups(groupeIds)
                 .describedGroups().values()
                 .forEach((descriptionFuture -> descriptionFuture.thenApply(description -> update(view, description))));
@@ -53,20 +65,4 @@ public class KafkaController {
         return null;
     }
 
-
-    private Void update(TopicsPage view, Collection<TopicListing> topics) {
-
-        var topicsConfig = topics.stream()
-                .map(t -> new ConfigResource(ConfigResource.Type.TOPIC, t.name()))
-                .collect(Collectors.toSet());
-        client.describeConfigs(topicsConfig).values()
-                .forEach((configResource, f) -> f.thenApply(conf -> update(view, configResource.name(), conf)));
-        return null;
-    }
-
-    private Void update(TopicsPage model, String name, Config description) {
-        model.add(name, description.get("cleanup.policy").value());
-
-        return null;
-    }
 }

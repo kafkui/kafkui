@@ -17,12 +17,8 @@ public class ConsumersPage implements Page {
         return table;
     }
 
-    public void add(String name, String policy) {
-        table.addRow(name, policy);
-    }
-
     public void add(String groupId) {
-        table.addRow(groupId);
+        table.putRow(groupId, groupId);
     }
 
     @Override

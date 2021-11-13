@@ -5,20 +5,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ViewLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(ViewLayout.class);
 
-    private final List<AttributedStringBuilder> sequences;
+    private final Map<String, ViewItem> items;
+
     private int width;
+    private List<String> order;
 
     public ViewLayout() {
-        this.sequences = new ArrayList<>();
+        this.items = new HashMap<>();
+        this.order = new ArrayList<>();
         this.width = 0;
     }
-
 
     @Override
     public int getWidth() {
@@ -27,36 +31,42 @@ public class ViewLayout extends InnerLayout {
 
     @Override
     public int getHeight() {
-        return sequences.size();
+        return items.size();
     }
-
 
     @Override
     public void resize(int width, int height) {
-        log.debug("Resized : {}", this);
+        log.warn("Ignoring view layout resized : {} to {},{}", this, width, height);
     }
 
     @Override
     public AttributedStringBuilder render(int y) {
-        return new AttributedStringBuilder().append(sequences.get(y));
+        String key = order.get(y);
+        return items.get(key).render();
     }
-
 
     // TODO : Synchronize with rezising and drawing
-    public void addItem(String item) {
-        var line = new AttributedStringBuilder().append(item);
-
-        if (line.columnLength() >= width) {
-            width = line.columnLength();
-            sequences.forEach(l -> l.append(" ".repeat(width - l.columnLength())));
+    // TODO : Reduce width if set a value shorter
+    public void putItem(String key, String value) {
+        var item = items.get(key);
+        if (item == null) {
+            item = new ViewItem(this, key, value);
+            items.put(key, item);
+            order.add(key);
         } else {
-            line.append(" ".repeat(width - line.columnLength()));
+            item.setValue(value);
         }
-        sequences.add(line);
+        var itemWidth = item.getWidth();
+        if (itemWidth > width) {
+            items.values().forEach(i -> i.setWidth(width));
+        }
+    }
+
+    public void setOrder(List<String> keyOrder) {
+        if (keyOrder.size() != items.size()) {
+            throw new IllegalArgumentException("Only supported total ordering " + keyOrder.size() + items.size());
+        }
 
     }
 
-    public List<AttributedStringBuilder> getContent() {
-        return sequences;
-    }
 }
