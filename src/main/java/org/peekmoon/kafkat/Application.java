@@ -64,6 +64,7 @@ public class Application  {
 
 
             Page currentPage = topicsPage;
+            switchLayout.switchTo("TOPICS");
             boolean askQuit = false;
             while (!askQuit){
 
@@ -75,12 +76,10 @@ public class Application  {
 
                         currentPage = consumersPage;
                         switchLayout.switchTo("CONSUMERS");
-                        currentPage.activate();
                     }
                     case SWITCH_TO_TOPICS -> {
                         currentPage = topicsPage;
                         switchLayout.switchTo("TOPICS");
-                        currentPage.activate();
                     }
                 }
                 currentPage.process(op);

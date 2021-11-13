@@ -22,11 +22,6 @@ public class TopicsPage implements Page {
     }
 
     @Override
-    public void activate() {
-
-    }
-
-    @Override
     public void process(Application.Operation op) {
         switch (op) {
             case UP -> table.selectUp();
