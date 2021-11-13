@@ -47,7 +47,10 @@ public class ScrollLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
+        log.debug("Resizing : {} to {},{}", this, width, height);
         virtualLayout.resize(width, height);
+        //this.width = width;
+        //this.height = height;
         this.width = Math.min(virtualLayout.getWidth(), width);
         this.height = Math.min(virtualLayout.getHeight(), height);
         if (offsetY + this.height > virtualLayout.getHeight()) { // Stay inside when becoming bigger

@@ -1,8 +1,13 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EmptyLayout extends InnerLayout {
+
+    private final static Logger log = LoggerFactory.getLogger(EmptyLayout.class);
+
 
     private AttributedStringBuilder line = new AttributedStringBuilder();
     private int width, height;
@@ -19,10 +24,11 @@ public class EmptyLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
+        log.debug("Resizing : {} to {},{}", this, width, height);
         this.width = width;
         this.height = height;
         this.line = new AttributedStringBuilder().append(" ".repeat(width));
-
+        log.debug("Resized : {}", this);
     }
 
     @Override

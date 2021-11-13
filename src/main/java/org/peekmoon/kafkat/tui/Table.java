@@ -13,18 +13,27 @@ public class Table extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(Table.class);
 
+    private final StackVerticalLayout masterLayout;
     private final ScrollLayout scrollLayout;
     private final SelectableLayout selectableLayout;
-    private final StackLayout layout;
+    private final StackHorizontalLayout contentLayout;
+    private final StackHorizontalLayout titlesLayout;
     private final List<Column> columns = new ArrayList<>();
     private final Map<String, Column> columnMap = new HashMap<>();
 
 
     public Table() {
-        this.layout = new StackLayout();
-        this.selectableLayout = new SelectableLayout(layout);
+        this.masterLayout = new StackVerticalLayout();
+
+        this.titlesLayout = new StackHorizontalLayout();
+
+        this.contentLayout = new StackHorizontalLayout();
+        this.selectableLayout = new SelectableLayout(contentLayout);
         this.scrollLayout = new ScrollLayout(selectableLayout);
-        this.scrollLayout.setParent(this);
+
+        this.masterLayout.add(titlesLayout);
+        this.masterLayout.add(scrollLayout);
+        this.masterLayout.setParent(this);
     }
 
 
@@ -40,9 +49,10 @@ public class Table extends InnerLayout {
 
     public void addColumn(String name) {
         var col = new Column();
-        layout.add(col.getLayout());
+        contentLayout.add(col.getLayout());
         columns.add(col);
         columnMap.put(name, col);
+        titlesLayout.add(col.getTitleLayout());
     }
 
     public void putRow(String key, String... cols) {
@@ -63,36 +73,40 @@ public class Table extends InnerLayout {
 
     @Override
     public int getWidth() {
-        return scrollLayout.getWidth();
+        return masterLayout.getWidth();
     }
 
     @Override
     public int getHeight() {
-        return scrollLayout.getHeight();
+        return masterLayout.getHeight();
     }
 
     @Override
     public void resize(int width, int height) {
-        scrollLayout.resize(width, height);
+        log.debug("Resizing : {} to {},{}", this, width, height);
+        masterLayout.resize(width, height);
         scrollLayout.makeVisible(selectableLayout.getSelectedOffet());
         log.debug("Resized : {}", this);
     }
 
     @Override
     public AttributedStringBuilder render(int y) {
-        return scrollLayout.render(y);
+        return masterLayout.render(y);
     }
 
 
     private class Column {
-        private final ViewLayout view;
+        private final ViewLayout titleLayout;
+        private final ViewLayout contentLayout;
         private final ScrollLayout scroller;
         private final ConstrainedSizeLayout sizer;
 
 
         private Column() {
-            this.view = new ViewLayout();
-            this.scroller = new ScrollLayout(view);
+            this.titleLayout = new ViewLayout();
+            this.titleLayout.putItem("Title","$");
+            this.contentLayout = new ViewLayout();
+            this.scroller = new ScrollLayout(contentLayout);
             this.sizer = new ConstrainedSizeLayout(scroller);
         }
 
@@ -101,10 +115,14 @@ public class Table extends InnerLayout {
         }
 
         public void putItem(String key, String col) {
-            view.putItem(key, col);
-            sizer.setMinWidth(view.getWidth());
-            sizer.setMaxHeight(view.getHeight());
-            sizer.setMinHeight(view.getHeight());
+            contentLayout.putItem(key, col);
+            sizer.setMinWidth(contentLayout.getWidth());
+            sizer.setMaxHeight(contentLayout.getHeight());
+            sizer.setMinHeight(contentLayout.getHeight());
+        }
+
+        public InnerLayout getTitleLayout() {
+            return titleLayout;
         }
     }
 

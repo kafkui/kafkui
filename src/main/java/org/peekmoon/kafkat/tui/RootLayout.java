@@ -30,6 +30,7 @@ public class RootLayout implements Layout {
 
     @Override
     public void resize(int width, int height) {
+        log.debug("Resizing : {} to {},{}", this, width, height);
         inner.resize(width, height);
         log.debug("Resized : {}", this);
     }

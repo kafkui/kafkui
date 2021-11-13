@@ -36,7 +36,7 @@ public class ViewLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
-        log.warn("Ignoring view layout resized : {} to {},{}", this, width, height);
+        log.debug("Ignoring view layout resized : {} to {},{}", this, width, height);
     }
 
     @Override
@@ -56,9 +56,10 @@ public class ViewLayout extends InnerLayout {
         } else {
             item.setValue(value);
         }
-        var itemWidth = item.getWidth();
-        if (itemWidth > width) {
-            items.values().forEach(i -> i.setWidth(width));
+        var newItemWidth = item.getWidth();
+        if (newItemWidth > width) {
+            items.values().forEach(i -> i.setWidth(newItemWidth));
+            width = newItemWidth;
         }
     }
 

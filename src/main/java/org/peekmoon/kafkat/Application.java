@@ -89,37 +89,9 @@ public class Application  {
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
         }
-
-            //var topics = admin.describeTopics(topicsList).all().get();
-
-
-//            for (Node node : admin.describeCluster().nodes().get()) {
-//                writer.print("-- node: " + node.id() + " --");
-//                ConfigResource cr = new ConfigResource(ConfigResource.Type.BROKER, "0");
-//                DescribeConfigsResult dcr = admin.describeConfigs(Collections.singleton(cr));
-//                dcr.all().get().forEach((k, c) -> {
-//                    c.entries()
-//                            .forEach(configEntry -> {System.out.println(configEntry.name() + "= " + configEntry.value());});
-//                });
-
-
-//            terminal.flush();
     }
 
     private InnerLayout buildLayout() {
-
-//        table = new Table();
-//        table.addColumn("Id");
-//        table.addColumn("name");
-//        table.addColumn("status");
-//        for (int i=0; i<66;i++) {
-//            table.addRow(
-//                    String.format("<%2d: ", i) + UUID.randomUUID() + ">",
-//                    "<" + "bla".repeat(ThreadLocalRandom.current().nextInt(6) + 1) + ">",
-//                    String.format("<%2d: A droite : ", i) + UUID.randomUUID() + ">"
-//            );
-//        }
-
         this.topicsPage = new TopicsPage();
         this.consumersPage = new ConsumersPage();
 
@@ -128,9 +100,6 @@ public class Application  {
         switchLayout.add("TOPICS", topicsPage.getTable());
         switchLayout.add("CONSUMERS", consumersPage.getTable());
         return new FrameLayout(switchLayout);
-        //return new FrameLayout(topicsView.getTable());
-
-
     }
 
 

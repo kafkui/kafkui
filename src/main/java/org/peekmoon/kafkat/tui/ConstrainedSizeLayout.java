@@ -55,6 +55,7 @@ public class ConstrainedSizeLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
+        log.debug("Resizing : {} to {},{}", this, width, height);
         this.width = width;
         this.height = height;
 

@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StackLayout extends InnerLayout {
+public class StackHorizontalLayout extends InnerLayout {
 
-    private final static Logger log = LoggerFactory.getLogger(StackLayout.class);
+    private final static Logger log = LoggerFactory.getLogger(StackHorizontalLayout.class);
 
     private List<InnerLayout> inners = new ArrayList<>();
 
@@ -25,6 +25,7 @@ public class StackLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
+        log.debug("Resizing : {} to {},{}", this, width, height);
         // TODO : For now only all same size
         // TODO : For now only horizontal stack
         int innerWidth = width / inners.size();

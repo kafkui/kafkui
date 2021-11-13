@@ -35,6 +35,7 @@ public class FrameLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
+        log.debug("Resizing : {} to {},{}", this, width, height);
         inner.resize(width-2, height-2);
         log.debug("Resized : {}", this);
     }
