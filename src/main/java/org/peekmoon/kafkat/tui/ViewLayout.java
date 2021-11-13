@@ -36,7 +36,8 @@ public class ViewLayout extends InnerLayout {
 
     @Override
     public void resize(int width, int height) {
-        log.debug("Ignoring view layout resized : {} to {},{}", this, width, height);
+        log.debug("Resizing : {} to {},{}", this, width, height);
+        log.debug("Resized : {}", this);
     }
 
     @Override

@@ -85,6 +85,7 @@ public class Table extends InnerLayout {
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
         masterLayout.resize(width, height);
+        scrollLayout.resize(width, height-1);
         scrollLayout.makeVisible(selectableLayout.getSelectedOffet());
         log.debug("Resized : {}", this);
     }
@@ -96,29 +97,28 @@ public class Table extends InnerLayout {
 
 
     private class Column {
-        private final ViewLayout titleLayout;
+        private final ScrollLayout titleLayout;
         private final ViewLayout contentLayout;
         private final ScrollLayout scroller;
-        private final ConstrainedSizeLayout sizer;
 
 
         private Column() {
-            this.titleLayout = new ViewLayout();
-            this.titleLayout.putItem("Title","$");
+            var titleLayout = new ViewLayout();
+            titleLayout.putItem("Title","$");
+            this.titleLayout = new ScrollLayout(titleLayout);
             this.contentLayout = new ViewLayout();
             this.scroller = new ScrollLayout(contentLayout);
-            this.sizer = new ConstrainedSizeLayout(scroller);
         }
 
         public InnerLayout getLayout() {
-            return sizer;
+            return scroller;
         }
 
         public void putItem(String key, String col) {
             contentLayout.putItem(key, col);
-            sizer.setMinWidth(contentLayout.getWidth());
-            sizer.setMaxHeight(contentLayout.getHeight());
-            sizer.setMinHeight(contentLayout.getHeight());
+            scroller.setMinWidth(contentLayout.getWidth());
+            scroller.setMaxHeight(contentLayout.getHeight());
+            scroller.setMinHeight(contentLayout.getHeight());
         }
 
         public InnerLayout getTitleLayout() {
