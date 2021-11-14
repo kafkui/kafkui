@@ -24,6 +24,8 @@ public class KafkaController {
         client.listTopics().listings().thenApply(t -> update(view, t));
     }
 
+    ///////////////////
+    // Topics part
 
     private Void update(TopicsPage view, Collection<TopicListing> topics) {
         var configResourceList = new ArrayList<ConfigResource>();
@@ -46,7 +48,7 @@ public class KafkaController {
 
 
     ///////////////////
-    // Consumer part
+    // Consumers part
 
     public void update(ConsumersPage view) {
         client.listConsumerGroups().all().thenApply(c -> update(view, c));

@@ -1,8 +1,6 @@
 package org.peekmoon.kafkat;
 
-import org.peekmoon.kafkat.tui.InnerLayout;
-import org.peekmoon.kafkat.tui.Page;
-import org.peekmoon.kafkat.tui.Table;
+import org.peekmoon.kafkat.tui.*;
 
 public class ConsumersPage implements Page {
 
@@ -10,7 +8,7 @@ public class ConsumersPage implements Page {
 
     public ConsumersPage() {
         this.table = new Table();
-        table.addColumn("groupId");
+        table.addColumn("groupId", StackSizeMode.PROPORTIONAL, 1);
     }
 
     public InnerLayout getTable() {

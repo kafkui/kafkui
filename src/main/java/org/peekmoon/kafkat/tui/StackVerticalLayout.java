@@ -11,48 +11,70 @@ public class StackVerticalLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(StackVerticalLayout.class);
 
-    private List<InnerLayout> inners = new ArrayList<>();
+
+    private List<StackItem> inners = new ArrayList<>();
 
     @Override
     public int getWidth() {
-        return inners.stream().mapToInt(Layout::getWidth).max().orElse(0);
+        return inners.stream()
+                .map(StackItem::getInner)
+                .mapToInt(Layout::getWidth)
+                .max().orElse(0);
     }
 
     @Override
     public int getHeight() {
-        return inners.stream().mapToInt(Layout::getHeight).sum();
+        return inners.stream()
+                .map(StackItem::getInner)
+                .mapToInt(Layout::getHeight)
+                .sum();
     }
 
     @Override
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
 
-        // Fixé à la taille du contenu avec optionnellement un min et/ou un max
-        // Fixe à un taille = taille du contenu avec min = max
-        // Calcul la taille restante
-        // Partage avec un coeff entre ce qui reste
+        int totalSize = -0;
+        int totalProportion = 0;
+        int nbProportional = 0;
 
+        for (StackItem inner : inners) {
+            switch ( inner.getMode()) {
+                case SIZED -> totalSize += inner.getValue();
+                case PROPORTIONAL -> {
+                    totalProportion += inner.getValue();
+                    nbProportional ++;
+                }
+            }
+        }
 
-        int innerHeight = height / inners.size();
-        inners.forEach(l -> l.resize(width, innerHeight));
+        int spaceToShare = height - totalSize;
+
+        for (StackItem inner : inners) {
+            switch (inner.getMode()) {
+                case SIZED -> inner.resize(width, inner.getValue());
+                case PROPORTIONAL -> inner.resize(width, spaceToShare * totalProportion / totalProportion);
+            }
+        }
+
         log.debug("Resized : {}", this);
     }
 
     @Override
     public AttributedStringBuilder render(int y) {
         int offsetY = 0;
-        for (InnerLayout inner : inners) {
-            if (y < offsetY + inner.getHeight()) {
-                return inner.render(y - offsetY);
+        for (StackItem item : inners) {
+            if (y < offsetY + item.getInner().getHeight()) {
+                return item.getInner().render(y - offsetY);
             }
-            offsetY += inner.getHeight();
+            offsetY += item.getInner().getHeight();
         }
         throw new IllegalArgumentException("Unable to render line " + y + " max ofs : " + offsetY + " in " + this);
     }
 
-    public void add(InnerLayout innerLayout) {
+    public void add(InnerLayout innerLayout, StackSizeMode mode, int value) {
         innerLayout.setParent(this);
-        inners.add(innerLayout);
+        inners.add(new StackItem(innerLayout, mode, value));
     }
 
 

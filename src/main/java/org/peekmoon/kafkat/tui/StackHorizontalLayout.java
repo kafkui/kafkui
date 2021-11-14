@@ -11,32 +11,58 @@ public class StackHorizontalLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(StackHorizontalLayout.class);
 
-    private List<InnerLayout> inners = new ArrayList<>();
+    private List<StackItem> inners = new ArrayList<>();
 
     @Override
     public int getWidth() {
-        return inners.stream().mapToInt(Layout::getWidth).sum();
+        return inners.stream()
+                .map(StackItem::getInner)
+                .mapToInt(Layout::getWidth)
+                .sum();
     }
 
     @Override
     public int getHeight() {
-        return inners.stream().mapToInt(Layout::getHeight).max().orElse(0);
+        return inners.stream()
+                .map(StackItem::getInner)
+                .mapToInt(Layout::getHeight)
+                .max().orElse(0);
     }
 
     @Override
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
-        // TODO : For now only all same size
-        // TODO : For now only horizontal stack
-        int innerWidth = width / inners.size();
-        inners.forEach(l -> l.resize(innerWidth , height));
+
+        int totalSize = -0;
+        int totalProportion = 0;
+        int nbProportional = 0;
+
+        for (StackItem inner : inners) {
+            switch ( inner.getMode()) {
+                case SIZED -> totalSize += inner.getValue();
+                case PROPORTIONAL -> {
+                    totalProportion += inner.getValue();
+                    nbProportional ++;
+                }
+            }
+        }
+
+        int spaceToShare = width - totalSize;
+
+        for (StackItem inner : inners) {
+            switch (inner.getMode()) {
+                case SIZED -> inner.resize(inner.getValue(), height);
+                case PROPORTIONAL -> inner.resize(spaceToShare * totalProportion / totalProportion, height);
+            }
+        }
+
         log.debug("Resized : {}", this);
     }
 
     @Override
     public AttributedStringBuilder render(int y) {
         AttributedStringBuilder builder = new AttributedStringBuilder();
-        inners.forEach(l -> builder.append(buildLine(l, y)));
+        inners.forEach(l -> builder.append(buildLine(l.getInner(), y)));
         return builder;
     }
 
@@ -45,9 +71,9 @@ public class StackHorizontalLayout extends InnerLayout {
     }
 
 
-    public void add(InnerLayout innerLayout) {
+    public void add(InnerLayout innerLayout, StackSizeMode mode, int value) {
         innerLayout.setParent(this);
-        inners.add(innerLayout);
+        inners.add(new StackItem(innerLayout, mode, value));
     }
 
 

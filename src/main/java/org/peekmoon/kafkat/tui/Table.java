@@ -31,8 +31,8 @@ public class Table extends InnerLayout {
         this.selectableLayout = new SelectableLayout(contentLayout);
         this.scrollLayout = new ScrollLayout(selectableLayout);
 
-        this.masterLayout.add(titlesLayout);
-        this.masterLayout.add(scrollLayout);
+        this.masterLayout.add(titlesLayout, StackSizeMode.SIZED, 1);
+        this.masterLayout.add(scrollLayout, StackSizeMode.PROPORTIONAL, 1);
         this.masterLayout.setParent(this);
     }
 
@@ -47,12 +47,12 @@ public class Table extends InnerLayout {
         scrollLayout.makeVisible(newOffset);
     }
 
-    public void addColumn(String name) {
-        var col = new Column();
-        contentLayout.add(col.getLayout());
+    public void addColumn(String title, StackSizeMode mode, int value) {
+        var col = new Column(title);
+        contentLayout.add(col.getLayout(), mode, value);
         columns.add(col);
-        columnMap.put(name, col);
-        titlesLayout.add(col.getTitleLayout());
+        columnMap.put(title, col);
+        titlesLayout.add(col.getTitleLayout(), mode, value);
     }
 
     public void putRow(String key, String... cols) {
@@ -102,9 +102,9 @@ public class Table extends InnerLayout {
         private final ScrollLayout scroller;
 
 
-        private Column() {
+        private Column(String title) {
             var titleLayout = new ViewLayout();
-            titleLayout.putItem("Title","$");
+            titleLayout.putItem("Title",title);
             this.titleLayout = new ScrollLayout(titleLayout);
             this.contentLayout = new ViewLayout();
             this.scroller = new ScrollLayout(contentLayout);
