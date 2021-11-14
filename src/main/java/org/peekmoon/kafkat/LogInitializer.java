@@ -45,6 +45,7 @@ public class LogInitializer {
             builder
                     .append(record.getInstant()).append(" ")
                     .append(record.getLevel()).append(" ")
+                    .append(String.format("%05d ", record.getLongThreadID()))
                     .append(formatLoggerName(record.getLoggerName())).append(" - ")
                     .append(record.getMessage())
                     .append("\n");
@@ -61,6 +62,18 @@ public class LogInitializer {
             int fieldLength = 25;
             int cutBy = loggerName.length() - fieldLength;
             return cutBy >0 ? loggerName.substring(cutBy) : loggerName;
+        }
+
+        private void test() {
+            ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+            ThreadGroup parentGroup;
+            while ((parentGroup = rootGroup.getParent()) != null) {
+                rootGroup = parentGroup;
+            }
+            Thread[] threads = new Thread[rootGroup.activeCount()];
+            while (rootGroup.enumerate(threads, true ) == threads.length) {
+                threads = new Thread[threads.length * 2];
+            }
         }
     }
 
