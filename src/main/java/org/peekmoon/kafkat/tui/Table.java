@@ -1,6 +1,7 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,7 @@ public class Table extends InnerLayout {
 
         private Column(String title) {
             var titleLayout = new ViewLayout();
-            titleLayout.putItem("Title",title);
+            titleLayout.putItem("Title",title, AttributedStyle.BOLD);
             this.titleLayout = new ScrollLayout(titleLayout);
             this.contentLayout = new ViewLayout();
             this.scroller = new ScrollLayout(contentLayout);

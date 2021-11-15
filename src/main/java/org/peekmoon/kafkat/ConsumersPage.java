@@ -4,11 +4,13 @@ import org.peekmoon.kafkat.tui.*;
 
 public class ConsumersPage implements Page {
 
+    private static final String COL_NAME_GROUP_ID = "GROUP ID";
+
     private final Table table;
 
     public ConsumersPage() {
         this.table = new Table();
-        table.addColumn("groupId", StackSizeMode.PROPORTIONAL, 1);
+        table.addColumn(COL_NAME_GROUP_ID, StackSizeMode.PROPORTIONAL, 1);
     }
 
     public InnerLayout getTable() {

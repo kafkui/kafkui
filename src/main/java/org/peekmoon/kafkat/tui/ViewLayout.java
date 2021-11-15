@@ -1,6 +1,7 @@
 package org.peekmoon.kafkat.tui;
 
 import org.jline.utils.AttributedStringBuilder;
+import org.jline.utils.AttributedStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +47,16 @@ public class ViewLayout extends InnerLayout {
         return items.get(key).render();
     }
 
+    public void putItem(String key, String value) {
+        putItem(key, value, AttributedStyle.DEFAULT);
+    }
+
     // TODO : Synchronize with rezising and drawing
     // TODO : Reduce width if set a value shorter
-    public void putItem(String key, String value) {
+    public void putItem(String key, String value, AttributedStyle style) {
         var item = items.get(key);
         if (item == null) {
-            item = new ViewItem(this, key, value);
+            item = new ViewItem(this, key, value, style);
             items.put(key, item);
             order.add(key);
         } else {
