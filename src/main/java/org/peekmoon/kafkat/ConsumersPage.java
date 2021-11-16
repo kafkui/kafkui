@@ -1,6 +1,7 @@
 package org.peekmoon.kafkat;
 
 import org.peekmoon.kafkat.tui.*;
+import org.peekmoon.kafkat.tui.VerticalAlign;
 
 public class ConsumersPage implements Page {
 
@@ -10,7 +11,7 @@ public class ConsumersPage implements Page {
 
     public ConsumersPage() {
         this.table = new Table();
-        table.addColumn(COL_NAME_GROUP_ID, StackSizeMode.PROPORTIONAL, 1);
+        table.addColumn(COL_NAME_GROUP_ID, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
     }
 
     public InnerLayout getTable() {

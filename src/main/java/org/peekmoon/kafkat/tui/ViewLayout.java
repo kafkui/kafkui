@@ -10,19 +10,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/***
+ * A vertical list of items. Every item is a line on terminal.
+ * ViewLayoutSize is always the size of it's content. All lines have the same width which is the width of the longest line
+ */
 public class ViewLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(ViewLayout.class);
 
     private final Map<String, ViewItem> items;
+    private final VerticalAlign align;
 
     private int width;
     private List<String> order;
 
+
     public ViewLayout() {
+        this(VerticalAlign.LEFT);
+    }
+
+    public ViewLayout(VerticalAlign align) {
         this.items = new HashMap<>();
         this.order = new ArrayList<>();
         this.width = 0;
+        this.align = align;
     }
 
     @Override
@@ -51,8 +62,8 @@ public class ViewLayout extends InnerLayout {
         putItem(key, value, AttributedStyle.DEFAULT);
     }
 
-    // TODO : Synchronize with rezising and drawing
-    // TODO : Reduce width if set a value shorter
+    // FIXME : Synchronize with rezising and drawing
+    // TODO : Reduce width if removing the longest value
     public void putItem(String key, String value, AttributedStyle style) {
         var item = items.get(key);
         if (item == null) {
@@ -66,6 +77,8 @@ public class ViewLayout extends InnerLayout {
         if (newItemWidth > width) {
             items.values().forEach(i -> i.setWidth(newItemWidth));
             width = newItemWidth;
+        } else {
+            item.setWidth(width);
         }
     }
 
@@ -73,7 +86,10 @@ public class ViewLayout extends InnerLayout {
         if (keyOrder.size() != items.size()) {
             throw new IllegalArgumentException("Only supported total ordering " + keyOrder.size() + items.size());
         }
+    }
 
+    protected VerticalAlign getAlign() {
+        return align;
     }
 
 }

@@ -9,6 +9,8 @@ public class ScrollLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(ScrollLayout.class);
 
+    private final VerticalAlign align;
+
     private int minWidth, maxWidth;
     private int minHeight, maxHeight;
     private int width, height;
@@ -17,10 +19,15 @@ public class ScrollLayout extends InnerLayout {
     private final InnerLayout inner;
 
     public ScrollLayout(InnerLayout inner) {
+        this(inner, VerticalAlign.LEFT);
+    }
+
+    public ScrollLayout(InnerLayout inner, VerticalAlign align) {
         this.inner = inner;
         inner.setParent(this);
         this.minWidth = this.minHeight = 0;
         this.maxWidth = this.maxHeight = Integer.MAX_VALUE;
+        this.align = align;
         this.offsetX = this.offsetY = 0;
     }
 
@@ -86,7 +93,11 @@ public class ScrollLayout extends InnerLayout {
         }
 
         if (innerLine.columnLength() <= width) {
-            return innerLine.append(" ".repeat(width - innerLine.columnLength()));
+            String padding = " ".repeat(width - innerLine.columnLength());
+            return switch (align) {
+                case LEFT -> innerLine.append(padding);
+                case RIGHT -> new AttributedStringBuilder().append(padding).append(innerLine);
+            };
         }
 
         throw new IllegalStateException("Unable to get case");

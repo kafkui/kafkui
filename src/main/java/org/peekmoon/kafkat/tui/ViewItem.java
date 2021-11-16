@@ -10,15 +10,15 @@ public class ViewItem {
     private int width;
     private AttributedStringBuilder line;
 
-    public ViewItem(ViewLayout parent, String key, String value) {
+    ViewItem(ViewLayout parent, String key, String value) {
         this(parent, key, new AttributedStringBuilder().append(value));
     }
 
-    public ViewItem(ViewLayout parent, String key, String value, AttributedStyle style) {
+    ViewItem(ViewLayout parent, String key, String value, AttributedStyle style) {
         this(parent, key, new AttributedStringBuilder().append(value, style));
     }
 
-    public ViewItem(ViewLayout parent, String key, AttributedStringBuilder value) {
+    ViewItem(ViewLayout parent, String key, AttributedStringBuilder value) {
         this.parent = parent;
         this.key = key;
         setValue(value);
@@ -52,7 +52,11 @@ public class ViewItem {
     private void adjustLineLength() {
         var length = line.columnLength();
         if (length < width) {
-            line.append(" ".repeat(width - length));
+            String padding = " ".repeat(width - length);
+            switch (parent.getAlign()) {
+                case LEFT -> line.append(padding);
+                case RIGHT -> line = new AttributedStringBuilder().append(padding).append(line);
+            }
         }
     }
 

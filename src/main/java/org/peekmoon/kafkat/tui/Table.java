@@ -48,8 +48,8 @@ public class Table extends InnerLayout {
         scrollLayout.makeVisible(newOffset);
     }
 
-    public void addColumn(String title, StackSizeMode mode, int value) {
-        var col = new Column(title);
+    public void addColumn(String title, VerticalAlign align, StackSizeMode mode, int value) {
+        var col = new Column(title, align);
         contentLayout.add(col.getLayout(), mode, value);
         columns.add(col);
         columnMap.put(title, col);
@@ -103,12 +103,12 @@ public class Table extends InnerLayout {
         private final ScrollLayout scroller;
 
 
-        private Column(String title) {
-            var titleLayout = new ViewLayout();
+        private Column(String title, VerticalAlign align) {
+            var titleLayout = new ViewLayout(align);
             titleLayout.putItem("Title",title, AttributedStyle.BOLD);
-            this.titleLayout = new ScrollLayout(titleLayout);
-            this.contentLayout = new ViewLayout();
-            this.scroller = new ScrollLayout(contentLayout);
+            this.titleLayout = new ScrollLayout(titleLayout, align);
+            this.contentLayout = new ViewLayout(align);
+            this.scroller = new ScrollLayout(contentLayout, align);
         }
 
         public InnerLayout getLayout() {
