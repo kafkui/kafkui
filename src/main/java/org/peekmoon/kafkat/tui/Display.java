@@ -25,7 +25,7 @@ public class Display implements Runnable, Closeable {
 
     private final Terminal terminal;
     private final AtomicBoolean askStop;
-    private final BlockingQueue invalidate;
+    private final BlockingQueue<String> invalidate;
     private final Terminal.SignalHandler prevWinchHandler;
     private final Attributes savedAttributes;
     private final org.jline.utils.Display display;
@@ -38,7 +38,7 @@ public class Display implements Runnable, Closeable {
         this.layout = new RootLayout(this, layout);
 
         this.askStop = new AtomicBoolean(false);
-        this.invalidate = new LinkedBlockingQueue(1);
+        this.invalidate = new LinkedBlockingQueue<>(1);
 
         this.display = new org.jline.utils.Display(terminal, true);
 
@@ -61,30 +61,6 @@ public class Display implements Runnable, Closeable {
         invalidate();
         log.info("Resize done");
     }
-
-
-    //var topics = admin.describeTopics(topicsList).all().get();
-
-
-//            for (Node node : admin.describeCluster().nodes().get()) {
-//                writer.print("-- node: " + node.id() + " --");
-//                ConfigResource cr = new ConfigResource(ConfigResource.Type.BROKER, "0");
-//                DescribeConfigsResult dcr = admin.describeConfigs(Collections.singleton(cr));
-//                dcr.all().get().forEach((k, c) -> {
-//                    c.entries()
-//                            .forEach(configEntry -> {System.out.println(configEntry.name() + "= " + configEntry.value());});
-//                });
-
-
-//            terminal.flush();
-
-
-//
-//
-//            display.clear();
-//            display.update(Collections.emptyList(), terminal.getSize().cursorPos(10,10));
-//            display.
-
 
     @Override
     public void run() {
@@ -130,7 +106,7 @@ public class Display implements Runnable, Closeable {
 
     // Use a queue allow to have only one drawing at a time and aggragate all requests
     public void invalidate() {
-        invalidate.offer("dummy"); // TODO : Think to a better event management
+        invalidate.offer("dummy");
     }
 
 

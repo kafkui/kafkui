@@ -8,8 +8,6 @@ import org.peekmoon.kafkat.tui.Table;
 import org.peekmoon.kafkat.tui.VerticalAlign;
 
 import java.time.Duration;
-import java.time.Period;
-import java.time.temporal.ChronoUnit;
 
 public class TopicsPage implements Page {
 

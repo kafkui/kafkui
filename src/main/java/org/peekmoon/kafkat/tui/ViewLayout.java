@@ -22,7 +22,7 @@ public class ViewLayout extends InnerLayout {
     private final VerticalAlign align;
 
     private int width;
-    private List<String> order;
+    private final List<String> order;
 
 
     public ViewLayout() {
@@ -84,7 +84,7 @@ public class ViewLayout extends InnerLayout {
 
     public void setOrder(List<String> keyOrder) {
         if (keyOrder.size() != items.size()) {
-            throw new IllegalArgumentException("Only supported total ordering " + keyOrder.size() + items.size());
+            throw new IllegalArgumentException("Only supported total ordering " + keyOrder.size() +"<>" + items.size());
         }
     }
 

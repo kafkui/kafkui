@@ -21,6 +21,7 @@ public class Table extends InnerLayout {
     private final StackHorizontalLayout titlesLayout;
     private final List<Column> columns = new ArrayList<>();
     private final Map<String, Column> columnMap = new HashMap<>();
+    private final List<String> keys = new ArrayList<>();
 
 
     public Table() {
@@ -56,10 +57,12 @@ public class Table extends InnerLayout {
         titlesLayout.add(col.getTitleLayout(), mode, value);
     }
 
-    public void putRow(String key, String... cols) {
+    public synchronized void putRow(String key, String... cols) {
         if (cols.length != columns.size()) {
             throw new IllegalArgumentException("Bad col number " + cols.length + " != " + columns.size());
         }
+
+        if (!keys.contains(key)) keys.add(key);
 
         for (int noCol = 0; noCol<columns.size(); noCol++) {
             columns.get(noCol).putItem(key, cols[noCol]);
@@ -67,9 +70,14 @@ public class Table extends InnerLayout {
         invalidate();
     }
 
-    // TODO : Check if key already knew unless add key in every cols
-    public void putValue(String key, String colName, String value) {
-        columnMap.get(colName).putItem(key, value);
+    public synchronized void putValue(String key, String colName, String value) {
+        Column column = columnMap.get(colName);
+        if (!keys.contains(key)) {
+           // This is a new line add value for eveny columns
+           keys.add(key);
+           columnMap.forEach((k,c) -> c.putItem(key, "?"));
+        }
+        column.putItem(key, value);
     }
 
     @Override

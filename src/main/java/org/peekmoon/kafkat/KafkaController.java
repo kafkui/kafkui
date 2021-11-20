@@ -90,13 +90,15 @@ public class KafkaController {
     }
 
     private KafkaFuture<Map<String, ConsumerGroupDescription>> askConsumerDescription(ConsumersPage view, Collection<ConsumerGroupListing> consumers) {
-        var groupeIds = consumers.stream().map(ConsumerGroupListing::groupId).collect(Collectors.toList());
+        var groupeIds = consumers.stream()
+                .map(ConsumerGroupListing::groupId)
+                .collect(Collectors.toList());
         return client.describeConsumerGroups(groupeIds).all();
     }
 
-    private Void updateConsumer(ConsumersPage view, Map<String, ConsumerGroupDescription> descriptions) {
+    private Void updateConsumer(ConsumersPage page, Map<String, ConsumerGroupDescription> descriptions) {
         for (ConsumerGroupDescription description : descriptions.values()) {
-            view.add(description.groupId());
+            page.setDescription(description);
         }
         return null;
     }
