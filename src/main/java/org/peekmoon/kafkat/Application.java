@@ -1,5 +1,7 @@
 package org.peekmoon.kafkat;
 
+ import org.apache.kafka.clients.admin.AdminClient;
+ import org.apache.kafka.clients.admin.AdminClientConfig;
  import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.peekmoon.kafkat.tui.*;
@@ -7,7 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
+ import java.util.Properties;
+ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.jline.terminal.TerminalBuilder.PROP_DISABLE_ALTERNATE_CHARSET;
@@ -58,13 +61,16 @@ public class Application  {
             displayThread.setDaemon(true);
             displayThread.start();
 
-            KafkaController kafkaController = new KafkaController();
-            kafkaController.update(topicsPage);
-            kafkaController.update(consumersPage);
+            Properties config = new Properties();
+            //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
+            config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
+            var client = AdminClient.create(config);
+
 
 
             Page currentPage = topicsPage;
             switchLayout.switchTo("TOPICS");
+            topicsPage.update(client);
             boolean askQuit = false;
             while (!askQuit){
 
@@ -73,11 +79,12 @@ public class Application  {
                 switch (op) {
                     case EXIT -> askQuit = true;
                     case SWITCH_TO_CONSUMER -> {
-
+                        consumersPage.update(client);
                         currentPage = consumersPage;
                         switchLayout.switchTo("CONSUMERS");
                     }
                     case SWITCH_TO_TOPICS -> {
+                        topicsPage.update(client);
                         currentPage = topicsPage;
                         switchLayout.switchTo("TOPICS");
                     }

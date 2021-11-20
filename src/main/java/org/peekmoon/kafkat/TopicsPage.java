@@ -1,13 +1,20 @@
 package org.peekmoon.kafkat;
 
+import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.Config;
 import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.admin.TopicListing;
+import org.apache.kafka.common.KafkaFuture;
+import org.apache.kafka.common.config.ConfigResource;
 import org.peekmoon.kafkat.tui.Page;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
 import org.peekmoon.kafkat.tui.VerticalAlign;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class TopicsPage implements Page {
 
@@ -46,33 +53,59 @@ public class TopicsPage implements Page {
         }
     }
 
-    public void addTopic(String name) {
-        table.putValue(name, "name", name);
-    }
+    public void update(AdminClient client)  {
 
-    public Void setConfig(String name, Config conf) {
-        final String cleanupPolicy = conf.get("cleanup.policy").value();
-        table.putValue(name, "policy", cleanupPolicy);
-        switch (cleanupPolicy) {
-            case "delete" -> {
-                table.putValue(name, COL_NAME_RETENTION_TIME, getRetentionTime(conf));
-                table.putValue(name, COL_NAME_RETENTION_SIZE, getRetentionSize(conf));
+        try {
+            var topicListing = client.listTopics().listings().get();
+
+            var configResourceList = new ArrayList<ConfigResource>();
+            var topicsName = new ArrayList<String>();
+            for (TopicListing topic : topicListing) {
+                String topicName = topic.name();
+                table.putValue(topicName, "name", topicName);
+                configResourceList.add(new ConfigResource(ConfigResource.Type.TOPIC, topicName));
+                topicsName.add(topicName);
             }
-            case "compact" -> {
-                table.putValue(name, COL_NAME_RETENTION_TIME, "-");
-                table.putValue(name, COL_NAME_RETENTION_SIZE, "-");
-            }
+
+            KafkaFuture.allOf(
+                    client.describeTopics(topicsName).all().thenApply(r -> updateTopicsDescription(r)),
+                    client.describeConfigs(configResourceList).all().thenApply(r -> updateTopicsConfig(r))
+            ).get();
+
+        } catch (ExecutionException | InterruptedException e) {
+            throw new IllegalStateException("Unable to retrieve topics data", e);
         }
 
+    }
+
+    private Void updateTopicsConfig(Map<ConfigResource, Config> configs) {
+        for (Map.Entry<ConfigResource, Config> entry : configs.entrySet()) {
+            String name = entry.getKey().name();
+            Config conf = entry.getValue();
+            final String cleanupPolicy = conf.get("cleanup.policy").value();
+            table.putValue(name, "policy", cleanupPolicy);
+            switch (cleanupPolicy) {
+                case "delete" -> {
+                    table.putValue(name, COL_NAME_RETENTION_TIME, getRetentionTime(conf));
+                    table.putValue(name, COL_NAME_RETENTION_SIZE, getRetentionSize(conf));
+                }
+                case "compact" -> {
+                    table.putValue(name, COL_NAME_RETENTION_TIME, "-");
+                    table.putValue(name, COL_NAME_RETENTION_SIZE, "-");
+                }
+            }
+
+        }
         return null;
     }
 
-    public Void setDescription(TopicDescription description) {
-        //table.putValue(description.name(), "uuid", description.topicId().toString());
-        int partitions = description.partitions().size();
-        table.putValue(description.name(), "part", String.valueOf(partitions));
-        int replicas = description.partitions().get(0).replicas().size();
-        table.putValue(description.name(), "repl", String.valueOf(replicas));
+    private Void updateTopicsDescription(Map<String, TopicDescription> descriptions) {
+        for (TopicDescription description : descriptions.values()) {
+            int partitions = description.partitions().size();
+            table.putValue(description.name(), "part", String.valueOf(partitions));
+            int replicas = description.partitions().get(0).replicas().size();
+            table.putValue(description.name(), "repl", String.valueOf(replicas));
+        }
         return null;
     }
 
@@ -81,6 +114,13 @@ public class TopicsPage implements Page {
         var value = Long.parseLong(param.value());
         if (value == -1) return "ထ ";
         return humanReadableDuration(Duration.ofMillis(value));
+    }
+
+    private String getRetentionSize(Config config) {
+        var param = config.get("retention.bytes");
+        var value = Long.parseLong(param.value());
+        if (value == -1) return "ထ ";
+        return humanReadableByteCount(value, false);
     }
 
     private String humanReadableDuration(Duration duration) {
@@ -104,14 +144,6 @@ public class TopicsPage implements Page {
 
         return result.toString();
     }
-
-    private String getRetentionSize(Config config) {
-        var param = config.get("retention.bytes");
-        var value = Long.parseLong(param.value());
-        if (value == -1) return "ထ ";
-        return humanReadableByteCount(value, false);
-    }
-
 
     // From: https://programming.guide/worlds-most-copied-so-snippet.html
     private strictfp String humanReadableByteCount(long bytes, boolean si) {
