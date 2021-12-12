@@ -125,6 +125,8 @@ public class Table extends InnerLayout {
             this.titleLayout = new ScrollLayout("col-" + title + "-title",titleLayout, align);
             this.contentLayout = new ViewLayout("col-" + title + "-view", align);
             this.scroller = new ScrollLayout("col-" + title + "-scroll", contentLayout, align);
+            this.scroller.setMinHeight(0);
+            this.scroller.setMaxHeight(0);
         }
 
         public InnerLayout getLayout() {
