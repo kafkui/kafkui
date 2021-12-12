@@ -24,14 +24,15 @@ public class Table extends InnerLayout {
     private final List<String> keys = new ArrayList<>();
 
 
-    public Table() {
-        this.masterLayout = new StackVerticalLayout();
+    public Table(String name) {
+        super("table-" + name);
+        this.masterLayout = new StackVerticalLayout("master-Vertical-" + name);
 
-        this.titlesLayout = new StackHorizontalLayout();
+        this.titlesLayout = new StackHorizontalLayout("title-" + name);
 
-        this.contentLayout = new StackHorizontalLayout();
+        this.contentLayout = new StackHorizontalLayout("content-" + name);
         this.selectableLayout = new SelectableLayout(contentLayout);
-        this.scrollLayout = new ScrollLayout(selectableLayout);
+        this.scrollLayout = new ScrollLayout(  "scroll-" + getName(), selectableLayout);
 
         this.masterLayout.add(titlesLayout, StackSizeMode.SIZED, 1);
         this.masterLayout.add(scrollLayout, StackSizeMode.PROPORTIONAL, 1);
@@ -45,6 +46,7 @@ public class Table extends InnerLayout {
     }
 
     public void selectDown() {
+        log.info("Selecting down");
         int newOffset = selectableLayout.selectDown();
         scrollLayout.makeVisible(newOffset);
     }
@@ -78,6 +80,7 @@ public class Table extends InnerLayout {
            columnMap.forEach((k,c) -> c.putItem(key, "?"));
         }
         column.putItem(key, value);
+        invalidate();
     }
 
     @Override
@@ -96,7 +99,7 @@ public class Table extends InnerLayout {
         masterLayout.resize(width, height);
         scrollLayout.resize(width, height-1);
         scrollLayout.makeVisible(selectableLayout.getSelectedOffet());
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override
@@ -112,11 +115,11 @@ public class Table extends InnerLayout {
 
 
         private Column(String title, VerticalAlign align) {
-            var titleLayout = new ViewLayout(align);
+            var titleLayout = new ViewLayout("col-" + title + "-content", align);
             titleLayout.putItem("Title",title, AttributedStyle.BOLD);
-            this.titleLayout = new ScrollLayout(titleLayout, align);
-            this.contentLayout = new ViewLayout(align);
-            this.scroller = new ScrollLayout(contentLayout, align);
+            this.titleLayout = new ScrollLayout("col-" + title + "-title",titleLayout, align);
+            this.contentLayout = new ViewLayout("col-" + title + "-view", align);
+            this.scroller = new ScrollLayout("col-" + title + "-scroll", contentLayout, align);
         }
 
         public InnerLayout getLayout() {

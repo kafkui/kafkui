@@ -1,12 +1,8 @@
 package org.peekmoon.kafkat;
 
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.Config;
-import org.apache.kafka.clients.admin.TopicDescription;
-import org.apache.kafka.clients.admin.TopicListing;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.config.ConfigResource;
-import org.peekmoon.kafkat.tui.Page;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
 import org.peekmoon.kafkat.tui.VerticalAlign;
@@ -14,6 +10,7 @@ import org.peekmoon.kafkat.tui.VerticalAlign;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 public class TopicsPage implements Page {
@@ -24,10 +21,12 @@ public class TopicsPage implements Page {
     public static final String COL_NAME_NB_PARTITION = "part";
     public static final String COL_NAME_NB_REPLICA = "repl";
     public static final String COL_NAME_CLEANUP_POLICY = "policy";
+
+    private final AdminClient client;
     private final Table table;
 
     public TopicsPage() {
-        this.table = new Table();
+        this.table = new Table("topics");
         //table.addColumn("uuid");
         table.addColumn(COL_NAME_TOPIC_NAME, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_NB_PARTITION, VerticalAlign.LEFT, StackSizeMode.SIZED, 5);
@@ -35,14 +34,29 @@ public class TopicsPage implements Page {
         table.addColumn(COL_NAME_CLEANUP_POLICY, VerticalAlign.LEFT, StackSizeMode.SIZED, 8);
         table.addColumn(COL_NAME_RETENTION_TIME, VerticalAlign.RIGHT, StackSizeMode.SIZED, 15);
         table.addColumn(COL_NAME_RETENTION_SIZE, VerticalAlign.RIGHT, StackSizeMode.SIZED, 10);
+
+        Properties config = new Properties();
+        //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
+        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
+        client = AdminClient.create(config);
     }
 
     public void add(String name, String policy) {
         table.putRow(name, name, policy);
     }
 
-    public Table getTable() {
+    public Table getLayout() {
         return table;
+    }
+
+    @Override
+    public void activate() {
+        update(client);
+    }
+
+    @Override
+    public void deactivate() {
+
     }
 
     @Override
@@ -68,8 +82,8 @@ public class TopicsPage implements Page {
             }
 
             KafkaFuture.allOf(
-                    client.describeTopics(topicsName).all().thenApply(r -> updateTopicsDescription(r)),
-                    client.describeConfigs(configResourceList).all().thenApply(r -> updateTopicsConfig(r))
+                    client.describeTopics(topicsName).all().thenApply(this::updateTopicsDescription),
+                    client.describeConfigs(configResourceList).all().thenApply(this::updateTopicsConfig)
             ).get();
 
         } catch (ExecutionException | InterruptedException e) {
@@ -146,7 +160,7 @@ public class TopicsPage implements Page {
     }
 
     // From: https://programming.guide/worlds-most-copied-so-snippet.html
-    private strictfp String humanReadableByteCount(long bytes, boolean si) {
+    private String humanReadableByteCount(long bytes, boolean si) {
         int unit = si ? 1000 : 1024;
         long absBytes = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);
         if (absBytes < unit) return bytes + " B";

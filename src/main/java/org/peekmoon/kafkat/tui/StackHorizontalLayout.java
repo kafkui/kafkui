@@ -13,6 +13,10 @@ public class StackHorizontalLayout extends InnerLayout {
 
     private List<StackItem> inners = new ArrayList<>();
 
+    StackHorizontalLayout(String name) {
+        super(name);
+    }
+
     @Override
     public int getWidth() {
         return inners.stream()
@@ -56,7 +60,7 @@ public class StackHorizontalLayout extends InnerLayout {
             }
         }
 
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override

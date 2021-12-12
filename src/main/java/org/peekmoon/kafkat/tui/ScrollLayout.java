@@ -18,11 +18,12 @@ public class ScrollLayout extends InnerLayout {
 
     private final InnerLayout inner;
 
-    public ScrollLayout(InnerLayout inner) {
-        this(inner, VerticalAlign.LEFT);
+    public ScrollLayout(String name, InnerLayout inner) {
+        this(name, inner, VerticalAlign.LEFT);
     }
 
-    public ScrollLayout(InnerLayout inner, VerticalAlign align) {
+    public ScrollLayout(String name, InnerLayout inner, VerticalAlign align) {
+        super(name);
         this.inner = inner;
         inner.setParent(this);
         this.minWidth = this.minHeight = 0;
@@ -75,7 +76,7 @@ public class ScrollLayout extends InnerLayout {
             offsetY = Math.max(0, inner.getHeight() - height);
         }
 
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package org.peekmoon.kafkat;
 
- import org.apache.kafka.clients.admin.AdminClient;
- import org.apache.kafka.clients.admin.AdminClientConfig;
  import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.peekmoon.kafkat.tui.*;
@@ -9,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
- import java.util.Properties;
  import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -31,6 +28,7 @@ public class Application  {
     private SwitchLayout switchLayout;
     private TopicsPage topicsPage;
     private ConsumersPage consumersPage;
+    private RecordPage recordPage;
 
     public void run() {
 
@@ -61,16 +59,9 @@ public class Application  {
             displayThread.setDaemon(true);
             displayThread.start();
 
-            Properties config = new Properties();
-            //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
-            config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
-            var client = AdminClient.create(config);
-
-
-
             Page currentPage = topicsPage;
             switchLayout.switchTo("TOPICS");
-            topicsPage.update(client);
+            topicsPage.activate();
             boolean askQuit = false;
             while (!askQuit){
 
@@ -79,18 +70,28 @@ public class Application  {
                 switch (op) {
                     case EXIT -> askQuit = true;
                     case SWITCH_TO_CONSUMER -> {
-                        consumersPage.update(client);
+                        currentPage.deactivate();
                         currentPage = consumersPage;
+                        currentPage.activate();
                         switchLayout.switchTo("CONSUMERS");
                     }
                     case SWITCH_TO_TOPICS -> {
-                        topicsPage.update(client);
+                        currentPage.deactivate();
                         currentPage = topicsPage;
+                        currentPage.activate();
                         switchLayout.switchTo("TOPICS");
+                    }
+                    case SWITCH_TO_RECORDS -> {
+                        currentPage.deactivate();
+                        currentPage = recordPage;
+                        currentPage.activate();
+                        switchLayout.switchTo("RECORDS");
                     }
                 }
                 currentPage.process(op);
             }
+
+            recordPage.close();
 
 
         } catch (IOException | InterruptedException e) {
@@ -101,12 +102,14 @@ public class Application  {
     private InnerLayout buildLayout() {
         this.topicsPage = new TopicsPage();
         this.consumersPage = new ConsumersPage();
+        this.recordPage = new RecordPage();
 
 
-        this.switchLayout = new SwitchLayout();
-        switchLayout.add("TOPICS", topicsPage.getTable());
-        switchLayout.add("CONSUMERS", consumersPage.getTable());
-        return new FrameLayout(switchLayout);
+        this.switchLayout = new SwitchLayout("MainPageSwitcher");
+        switchLayout.add("TOPICS", topicsPage.getLayout());
+        switchLayout.add("CONSUMERS", consumersPage.getLayout());
+        switchLayout.add("RECORDS", recordPage.getLayout());
+        return new FrameLayout("FrameAroundMainSwitch", switchLayout);
     }
 
 
@@ -117,7 +120,8 @@ public class Application  {
         DOWN,
         NONE,
         SWITCH_TO_TOPICS,
-        SWITCH_TO_CONSUMER
+        SWITCH_TO_CONSUMER,
+        SWITCH_TO_RECORDS
     }
 
 

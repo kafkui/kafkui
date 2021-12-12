@@ -12,7 +12,11 @@ public class SwitchLayout extends InnerLayout {
     private final static Logger log = LoggerFactory.getLogger(SwitchLayout.class);
 
     private final Map<String, InnerLayout> children = new HashMap<>();
-    private InnerLayout currentLayout = new EmptyLayout();
+    private InnerLayout currentLayout = new EmptyLayout("Dummy empty layout");
+
+    public SwitchLayout(String name) {
+        super(name);
+    }
 
     public void add(String name, InnerLayout child) {
         child.setParent(this);
@@ -42,7 +46,7 @@ public class SwitchLayout extends InnerLayout {
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
         children.values().forEach(c -> c.resize(width, height));
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override

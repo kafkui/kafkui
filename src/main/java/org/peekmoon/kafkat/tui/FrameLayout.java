@@ -18,7 +18,8 @@ public class FrameLayout extends InnerLayout {
 
     private final InnerLayout inner;
 
-    public FrameLayout(InnerLayout inner) {
+    public FrameLayout(String name, InnerLayout inner) {
+        super(name);
         this.inner = inner;
         inner.setParent(this);
     }
@@ -37,7 +38,7 @@ public class FrameLayout extends InnerLayout {
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
         inner.resize(width-2, height-2);
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
 

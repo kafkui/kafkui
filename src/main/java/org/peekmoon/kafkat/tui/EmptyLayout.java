@@ -12,6 +12,10 @@ public class EmptyLayout extends InnerLayout {
     private AttributedStringBuilder line = new AttributedStringBuilder();
     private int width, height;
 
+    EmptyLayout(String name) {
+        super(name);
+    }
+
     @Override
     public int getWidth() {
         return width;
@@ -28,7 +32,7 @@ public class EmptyLayout extends InnerLayout {
         this.width = width;
         this.height = height;
         this.line = new AttributedStringBuilder().append(" ".repeat(width));
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override

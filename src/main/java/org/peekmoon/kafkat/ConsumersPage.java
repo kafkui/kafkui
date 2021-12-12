@@ -1,14 +1,13 @@
 package org.peekmoon.kafkat;
 
-import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.admin.ConsumerGroupDescription;
-import org.apache.kafka.clients.admin.ConsumerGroupListing;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
 import org.peekmoon.kafkat.tui.*;
 import org.peekmoon.kafkat.tui.VerticalAlign;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -17,17 +16,33 @@ public class ConsumersPage implements Page {
     private static final String COL_NAME_GROUP_ID = "id";
     private static final String COL_NAME_GROUP_STATE = "State";
 
-
+    private final AdminClient client;
     private final Table table;
 
     public ConsumersPage() {
-        this.table = new Table();
+        this.table = new Table("consumers");
         table.addColumn(COL_NAME_GROUP_ID, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_GROUP_STATE, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
+
+        // TODO : Only one client for all pages
+        Properties config = new Properties();
+        //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
+        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
+        client = AdminClient.create(config);
     }
 
-    public InnerLayout getTable() {
+    public InnerLayout getLayout() {
         return table;
+    }
+
+    @Override
+    public void activate() {
+        update(client);
+    }
+
+    @Override
+    public void deactivate() {
+
     }
 
     @Override
@@ -44,7 +59,7 @@ public class ConsumersPage implements Page {
             admin.listConsumerGroups().all()
                     .thenApply(c -> askConsumerDescription(admin, c))
                     .get()
-                    .thenApply(c -> updateConsumer(c))
+                    .thenApply(this::updateConsumer)
                     .get();
 
         } catch (ExecutionException | InterruptedException e) {

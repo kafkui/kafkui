@@ -14,6 +14,11 @@ public class StackVerticalLayout extends InnerLayout {
 
     private List<StackItem> inners = new ArrayList<>();
 
+    StackVerticalLayout(String name) {
+        super(name);
+    }
+
+
     @Override
     public int getWidth() {
         return inners.stream()
@@ -57,7 +62,7 @@ public class StackVerticalLayout extends InnerLayout {
             }
         }
 
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override

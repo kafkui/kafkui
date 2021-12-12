@@ -105,7 +105,9 @@ public class Display implements Runnable, Closeable {
 
 
     // Use a queue allow to have only one drawing at a time and aggragate all requests
+    // TODO : Thinks to a less hacky implementation
     public void invalidate() {
+        //noinspection ResultOfMethodCallIgnored
         invalidate.offer("dummy");
     }
 

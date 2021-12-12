@@ -29,8 +29,9 @@ public class KeyboardController implements Runnable {
         keyMap.bind(Application.Operation.EXIT, "q", KeyMap.esc());
         keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
         keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
-        keyMap.bind(Application.Operation.SWITCH_TO_CONSUMER, "c");
-        keyMap.bind(Application.Operation.SWITCH_TO_TOPICS, "t");
+        keyMap.bind(Application.Operation.SWITCH_TO_CONSUMER, ":c");
+        keyMap.bind(Application.Operation.SWITCH_TO_TOPICS, ":t");
+        keyMap.bind(Application.Operation.SWITCH_TO_RECORDS, ":r");
 
         this.queue = queue;
     }

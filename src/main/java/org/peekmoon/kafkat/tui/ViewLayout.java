@@ -25,11 +25,12 @@ public class ViewLayout extends InnerLayout {
     private final List<String> order;
 
 
-    public ViewLayout() {
-        this(VerticalAlign.LEFT);
+    public ViewLayout(String name) {
+        this(name, VerticalAlign.LEFT);
     }
 
-    public ViewLayout(VerticalAlign align) {
+    public ViewLayout(String name, VerticalAlign align) {
+        super(name);
         this.items = new HashMap<>();
         this.order = new ArrayList<>();
         this.width = 0;
@@ -49,13 +50,14 @@ public class ViewLayout extends InnerLayout {
     @Override
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override
-    public AttributedStringBuilder render(int y) {
+    public synchronized AttributedStringBuilder render(int y) {
         String key = order.get(y);
-        return items.get(key).render();
+        ViewItem viewItem = items.get(key);
+        return viewItem.render();
     }
 
     public void putItem(String key, String value) {
@@ -64,7 +66,7 @@ public class ViewLayout extends InnerLayout {
 
     // FIXME : Synchronize with rezising and drawing
     // TODO : Reduce width if removing the longest value
-    public void putItem(String key, String value, AttributedStyle style) {
+    public synchronized void putItem(String key, String value, AttributedStyle style) {
         var item = items.get(key);
         if (item == null) {
             item = new ViewItem(this, key, value, style);

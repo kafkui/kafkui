@@ -13,12 +13,14 @@ public class SelectableLayout extends InnerLayout {
     private int selectedOffset;
 
     public SelectableLayout(InnerLayout inner) {
+        super("selectable-" + inner.getName());
         this.inner = inner;
         inner.setParent(this);
     }
 
     public int selectUp() {
         if (selectedOffset>0) {
+            log.info("Selecting up");
             selectedOffset--;
             invalidate();
         }
@@ -27,6 +29,7 @@ public class SelectableLayout extends InnerLayout {
 
     public int selectDown() {
         if (selectedOffset < getHeight() -1) {
+            log.info("Selecting down");
             selectedOffset++;
             invalidate();
         }
@@ -47,7 +50,7 @@ public class SelectableLayout extends InnerLayout {
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
         inner.resize(width, height);
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override

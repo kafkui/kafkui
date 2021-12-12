@@ -32,7 +32,7 @@ public class RootLayout implements Layout {
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
         inner.resize(width, height);
-        log.debug("Resized : {}", this);
+        log.debug("Resized  : {}", this);
     }
 
     @Override
@@ -43,5 +43,10 @@ public class RootLayout implements Layout {
     @Override
     public void invalidate() {
         display.invalidate();
+    }
+
+    @Override
+    public String getName() {
+        return "root";
     }
 }
