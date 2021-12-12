@@ -3,7 +3,7 @@ package org.peekmoon.kafkat.tui;
 import org.jline.utils.AttributedStringBuilder;
 import org.jline.utils.AttributedStyle;
 
-public class ViewItem {
+class ViewItem {
 
     private final ViewLayout parent;
     private final String key;
@@ -24,28 +24,28 @@ public class ViewItem {
         setValue(value);
     }
 
-    public void setValue(String value) {
+    void setValue(String value) {
         line = new AttributedStringBuilder().append(value);
         setValue(line);
 
     }
 
-    public void setValue(AttributedStringBuilder line) {
+    void setValue(AttributedStringBuilder line) {
         this.line = line;
         this.width = Math.max(line.columnLength(), width);
         adjustLineLength();
     }
 
-    public void setWidth(int width) {
+    void setWidth(int width) {
         this.width = width;
         adjustLineLength();
     }
 
-    public int getWidth() {
+    int getWidth() {
         return width;
     }
 
-    public AttributedStringBuilder render() {
+    AttributedStringBuilder render() {
         return line;
     }
 

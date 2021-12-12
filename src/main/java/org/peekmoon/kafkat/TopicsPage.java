@@ -3,6 +3,9 @@ package org.peekmoon.kafkat;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.config.ConfigResource;
+import org.jline.keymap.KeyMap;
+import org.jline.terminal.Terminal;
+import org.jline.utils.InfoCmp;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
 import org.peekmoon.kafkat.tui.VerticalAlign;
@@ -41,6 +44,11 @@ public class TopicsPage implements Page {
         client = AdminClient.create(config);
     }
 
+    @Override
+    public String getId() {
+        return "PAGE_TOPICS";
+    }
+
     public void add(String name, String policy) {
         table.putRow(name, name, policy);
     }
@@ -60,11 +68,23 @@ public class TopicsPage implements Page {
     }
 
     @Override
+    public KeyMap<Application.Operation> getKeyMap(Terminal terminal) {
+        var keyMap = new KeyMap<Application.Operation>();
+        keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
+        keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
+        return keyMap;
+    }
+
+    @Override
     public void process(Application.Operation op) {
         switch (op) {
             case UP -> table.selectUp();
             case DOWN -> table.selectDown();
         }
+    }
+
+    public String getCurrentTopic() {
+        return table.getCurrentSelection();
     }
 
     public void update(AdminClient client)  {
@@ -174,4 +194,5 @@ public class TopicsPage implements Page {
         }
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
+
 }

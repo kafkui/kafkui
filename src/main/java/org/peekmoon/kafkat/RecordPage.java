@@ -3,12 +3,15 @@ package org.peekmoon.kafkat;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.errors.InterruptException;
+import org.jline.keymap.KeyMap;
+import org.jline.terminal.Terminal;
+import org.jline.utils.InfoCmp;
 import org.peekmoon.kafkat.tui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Properties;
 
@@ -21,12 +24,14 @@ public class RecordPage implements Page {
     private final static Logger log = LoggerFactory.getLogger(RecordPage.class);
 
 
+    private final String topic;
     private final Table table;
     private final KafkaConsumer<String, String> consumer;
 
 
-    public RecordPage() {
+    public RecordPage(String topic) {
 
+        this.topic = topic;
         this.table = new Table("records");
         table.addColumn(COL_NAME_PARTITION, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
         table.addColumn(COL_NAME_OFFSET, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
@@ -38,7 +43,12 @@ public class RecordPage implements Page {
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList("auction.event"));
+        consumer.subscribe(Collections.singletonList(topic));
+    }
+
+    @Override
+    public String getId() {
+        return "PAGE_RECORDS_" + topic;
     }
 
 
@@ -48,11 +58,15 @@ public class RecordPage implements Page {
     public void activate() {
         t = new Thread(() -> {
             while (!Thread.interrupted()) {
-                log.info("Request new items from topic");
-                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(5000));
-                log.info("Received {} values", records.count());
-                for (ConsumerRecord<String, String> record : records) {
-                    table.putRow(getUid(record), String.valueOf(record.partition()), String.valueOf(record.offset()), record.value());
+                try {
+                    log.info("Request new items from topic");
+                    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(5000));
+                    log.info("Received {} values", records.count());
+                    for (ConsumerRecord<String, String> record : records) {
+                        table.putRow(getUid(record), String.valueOf(record.partition()), String.valueOf(record.offset()), record.value());
+                    }
+                } catch (InterruptException e) {
+                    log.info("Stopping pooling from kafa");
                 }
             }
         });
@@ -68,8 +82,16 @@ public class RecordPage implements Page {
         } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         } finally {
-            consumer.close();
+            close();
         }
+    }
+
+    @Override
+    public KeyMap<Application.Operation> getKeyMap(Terminal terminal) {
+        var keyMap = new KeyMap<Application.Operation>();
+        keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
+        keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
+        return keyMap;
     }
 
     @Override

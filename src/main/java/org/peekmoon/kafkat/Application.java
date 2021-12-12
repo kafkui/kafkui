@@ -7,10 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
- import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
 
-import static org.jline.terminal.TerminalBuilder.PROP_DISABLE_ALTERNATE_CHARSET;
+ import static org.jline.terminal.TerminalBuilder.PROP_DISABLE_ALTERNATE_CHARSET;
 
 public class Application  {
 
@@ -20,15 +18,18 @@ public class Application  {
 
     private final static Logger log = LoggerFactory.getLogger(Application.class.getName());
 
+
     public static void main(String[] args) {
 
         new Application().run();
     }
 
+    private KeyboardController keyboardController;
     private SwitchLayout switchLayout;
     private TopicsPage topicsPage;
     private ConsumersPage consumersPage;
     private RecordPage recordPage;
+    private Page currentPage;
 
     public void run() {
 
@@ -48,68 +49,61 @@ public class Application  {
         try (Terminal terminal = TerminalBuilder.builder().build();
              Display display = new Display(terminal, buildLayout())) {
 
-            BlockingQueue<Operation> actionQueue = new LinkedBlockingDeque<>();
 
             // TODO : Better implementation as the action queue. The display thread should be using the action queue ?
-            Thread keyboardThread = new Thread(new KeyboardController(terminal, actionQueue));
-            keyboardThread.setDaemon(true);
-            keyboardThread.start();
+            keyboardController = new KeyboardController(terminal);
 
             Thread displayThread = new Thread(display);
             displayThread.setDaemon(true);
             displayThread.start();
 
-            Page currentPage = topicsPage;
-            switchLayout.switchTo("TOPICS");
+            currentPage = topicsPage;
+            switchLayout.switchTo(topicsPage.getId());
+            keyboardController.setLocalKeyMap(topicsPage.getKeyMap(terminal));
             topicsPage.activate();
             boolean askQuit = false;
             while (!askQuit){
 
-                Operation op = actionQueue.take();
-                log.info("Receiving an new action {}", op);
+                Operation op = keyboardController.getEvent();
+                log.info("Receiving an new event {}", op);
                 switch (op) {
                     case EXIT -> askQuit = true;
-                    case SWITCH_TO_CONSUMER -> {
-                        currentPage.deactivate();
-                        currentPage = consumersPage;
-                        currentPage.activate();
-                        switchLayout.switchTo("CONSUMERS");
-                    }
-                    case SWITCH_TO_TOPICS -> {
-                        currentPage.deactivate();
-                        currentPage = topicsPage;
-                        currentPage.activate();
-                        switchLayout.switchTo("TOPICS");
-                    }
+                    case SWITCH_TO_CONSUMER -> switchPage(terminal, consumersPage);
+                    case SWITCH_TO_TOPICS -> switchPage(terminal, topicsPage);
                     case SWITCH_TO_RECORDS -> {
-                        currentPage.deactivate();
-                        currentPage = recordPage;
-                        currentPage.activate();
-                        switchLayout.switchTo("RECORDS");
+                        this.recordPage = new RecordPage(topicsPage.getCurrentTopic());
+                        switchPage(terminal, recordPage);
                     }
                 }
                 currentPage.process(op);
             }
 
-            recordPage.close();
+            currentPage.deactivate();
 
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private void switchPage(Terminal terminal, Page page) {
+        switchLayout.add(page.getId(), page.getLayout());
+        currentPage.deactivate();
+        page.activate();
+        keyboardController.setLocalKeyMap(page.getKeyMap(terminal));
+        switchLayout.switchTo(page.getId());
+        currentPage = page;
     }
 
     private InnerLayout buildLayout() {
         this.topicsPage = new TopicsPage();
         this.consumersPage = new ConsumersPage();
-        this.recordPage = new RecordPage();
-
 
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
-        switchLayout.add("TOPICS", topicsPage.getLayout());
-        switchLayout.add("CONSUMERS", consumersPage.getLayout());
-        switchLayout.add("RECORDS", recordPage.getLayout());
-        return new FrameLayout("FrameAroundMainSwitch", switchLayout);
+        var mainLayout = new FrameLayout("FrameAroundMainSwitch", switchLayout);
+        switchLayout.add(topicsPage.getId(), topicsPage.getLayout());
+        switchLayout.add(consumersPage.getId(), consumersPage.getLayout());
+        return mainLayout;
     }
 
 

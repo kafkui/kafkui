@@ -12,6 +12,7 @@ public class SwitchLayout extends InnerLayout {
     private final static Logger log = LoggerFactory.getLogger(SwitchLayout.class);
 
     private final Map<String, InnerLayout> children = new HashMap<>();
+    private int lastWidth, lastHeight;
     private InnerLayout currentLayout = new EmptyLayout("Dummy empty layout");
 
     public SwitchLayout(String name) {
@@ -20,9 +21,15 @@ public class SwitchLayout extends InnerLayout {
 
     public void add(String name, InnerLayout child) {
         child.setParent(this);
-        children.put(name, child);
+        var previous = children.put(name, child);
+        if (previous == null || previous != child) {
+            // A new layout child is comming
+            child.resize(lastWidth, lastHeight);
+        }
     }
 
+    // TODO : Synchronize
+    // TODO ; Remove all possibly public method to avoid sync problem
     public void switchTo(String name) {
         var child = children.get(name);
         if (child == null) {
@@ -45,6 +52,8 @@ public class SwitchLayout extends InnerLayout {
     @Override
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
+        this.lastWidth = width;
+        this.lastHeight = height;
         children.values().forEach(c -> c.resize(width, height));
         log.debug("Resized  : {}", this);
     }

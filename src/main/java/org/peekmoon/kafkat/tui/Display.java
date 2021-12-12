@@ -3,7 +3,6 @@ package org.peekmoon.kafkat.tui;
 import org.jline.terminal.Attributes;
 import org.jline.terminal.Size;
 import org.jline.terminal.Terminal;
-import org.jline.utils.AttributedCharSequence;
 import org.jline.utils.AttributedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +48,10 @@ public class Display implements Runnable, Closeable {
         terminal.puts(keypad_xmit);
         terminal.flush();
 
+        resize();
+    }
+
+    public void resize() {
         resize(Terminal.Signal.WINCH);
     }
 

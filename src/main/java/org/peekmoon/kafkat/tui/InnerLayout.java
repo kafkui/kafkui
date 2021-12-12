@@ -23,7 +23,7 @@ public abstract class InnerLayout implements Layout {
     }
 
     protected void setParent(Layout parent) {
-        if (this.parent != null) {
+        if (this.parent != null && this.parent != parent) {
             throw new IllegalStateException("Reparenting is not supported");
         }
         this.parent = parent;

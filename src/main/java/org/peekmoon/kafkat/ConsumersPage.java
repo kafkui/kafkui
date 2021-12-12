@@ -2,6 +2,9 @@ package org.peekmoon.kafkat;
 
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
+import org.jline.keymap.KeyMap;
+import org.jline.terminal.Terminal;
+import org.jline.utils.InfoCmp;
 import org.peekmoon.kafkat.tui.*;
 import org.peekmoon.kafkat.tui.VerticalAlign;
 
@@ -36,6 +39,11 @@ public class ConsumersPage implements Page {
     }
 
     @Override
+    public String getId() {
+        return "PAGE_CONSUMERS";
+    }
+
+    @Override
     public void activate() {
         update(client);
     }
@@ -43,6 +51,14 @@ public class ConsumersPage implements Page {
     @Override
     public void deactivate() {
 
+    }
+
+    @Override
+    public KeyMap<Application.Operation> getKeyMap(Terminal terminal) {
+        var keyMap = new KeyMap<Application.Operation>();
+        keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
+        keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
+        return keyMap;
     }
 
     @Override

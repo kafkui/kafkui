@@ -3,22 +3,18 @@ package org.peekmoon.kafkat;
 import org.jline.keymap.BindingReader;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
-import org.jline.utils.InfoCmp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Queue;
-
-public class KeyboardController implements Runnable {
+public class KeyboardController {
 
     private final static Logger log = LoggerFactory.getLogger(KeyboardController.class);
 
-
     private final BindingReader bindingReader;
     private final KeyMap<Application.Operation> keyMap;
-    private final Queue<Application.Operation> queue;
+    private KeyMap<Application.Operation> localKeyMap;
 
-    public KeyboardController(Terminal terminal, Queue<Application.Operation> queue) {
+    public KeyboardController(Terminal terminal) {
         log.info("Initializing console reader");
         bindingReader = new BindingReader(terminal.reader());
 
@@ -26,26 +22,28 @@ public class KeyboardController implements Runnable {
         keyMap.setAmbiguousTimeout(200);
         keyMap.setNomatch(Application.Operation.NONE);
         keyMap.bind(Application.Operation.SEARCH, "/");
-        keyMap.bind(Application.Operation.EXIT, "q", KeyMap.esc());
-        keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
-        keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
+        keyMap.bind(Application.Operation.EXIT, "q", KeyMap.esc() );
         keyMap.bind(Application.Operation.SWITCH_TO_CONSUMER, ":c");
         keyMap.bind(Application.Operation.SWITCH_TO_TOPICS, ":t");
         keyMap.bind(Application.Operation.SWITCH_TO_RECORDS, ":r");
-
-        this.queue = queue;
     }
 
-
-    @Override
-    public void run() {
-
-        //noinspection InfiniteLoopStatement
-        while (true) {
-            Application.Operation op = bindingReader.readBinding(keyMap);
-            log.info("Receiving a new operation {}", op);
-            if (op != Application.Operation.NONE) queue.add(op);
+    public void setLocalKeyMap(KeyMap<Application.Operation> localKeyMap) {
+        log.info("Switching keyMap");
+        // Remove previous localKeyMap from KayMap
+        if (this.localKeyMap != null) {
+            this.localKeyMap.getBoundKeys().forEach((k,v) -> keyMap.unbind(k));
         }
-
+        // Add new localKeyMap to globalKeyMap
+        this.localKeyMap = localKeyMap;
+        localKeyMap.getBoundKeys().forEach((k,v) -> keyMap.bind(v,k));
     }
+
+
+    public Application.Operation getEvent() {
+        Application.Operation op = bindingReader.readBinding(keyMap);
+        log.info("Receiving a new operation {}", op);
+        return op;
+    }
+
 }

@@ -51,6 +51,11 @@ public class Table extends InnerLayout {
         scrollLayout.makeVisible(newOffset);
     }
 
+    public String getCurrentSelection() {
+        var selectedOffet = selectableLayout.getSelectedOffet();
+        return keys.get(selectedOffet);
+    }
+
     public void addColumn(String title, VerticalAlign align, StackSizeMode mode, int value) {
         var col = new Column(title, align);
         contentLayout.add(col.getLayout(), mode, value);

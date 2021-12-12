@@ -12,7 +12,7 @@ public class LogInitializer {
         Logger rootLogger = Logger.getLogger("");
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String logDirectory = System.getProperty("log_directory");
-        String logFile = (logDirectory == null ? "/Users/j.lelong/Documents/perso/dev/kafkat/target" : logDirectory) + "/kafkat" + date + "_%u.log";
+        String logFile = (logDirectory == null ? "/Users/j.lelong/Documents/perso/dev/kafkat/target" : logDirectory) + "/kafkat.log";
         try {
             FileHandler logHandler = new FileHandler(logFile, 524288000, // 500 MB max size
                     1, // one log file at a time
