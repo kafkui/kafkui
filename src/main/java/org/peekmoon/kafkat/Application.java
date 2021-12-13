@@ -27,7 +27,6 @@ public class Application  {
         new Application().run();
     }
 
-    private final KeyMap<Action> keyMap = new KeyMap<>();
     private Terminal terminal;
     private boolean askQuit = false;
     private BlockingQueue<Action> actions = new ArrayBlockingQueue<>(10);
@@ -54,12 +53,6 @@ public class Application  {
 
         try (Terminal terminal = this.terminal = TerminalBuilder.builder().build();
              Display display = new Display(terminal, buildLayout())) {
-
-            keyMap.setAmbiguousTimeout(200);
-            keyMap.setNomatch(new VoidAction());
-            keyMap.bind(new ExitAction(this), "q", KeyMap.esc() );
-            keyMap.bind(new SwitchToPageAction(this, consumersPage), ":c");
-            keyMap.bind(new SwitchToPageAction(this, topicsPage), ":t");
 
             keyboardController = new KeyboardController(this, terminal, actions);
             Thread keyboardThread = new Thread(keyboardController, "KeyboardThread");
@@ -103,7 +96,7 @@ public class Application  {
 
     private InnerLayout buildLayout() {
         this.topicsPage = new TopicsPage(this);
-        this.consumersPage = new ConsumersPage();
+        this.consumersPage = new ConsumersPage(this);
 
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
         var mainLayout = new FrameLayout("FrameAroundMainSwitch", switchLayout);
@@ -113,7 +106,17 @@ public class Application  {
     }
 
 
-    public KeyMap<Action> getKeyMap() {
+    public KeyMap<Action> buildKeyMap() {
+        KeyMap<Action> keyMap = new KeyMap<>();
+        keyMap.setAmbiguousTimeout(100);
+        keyMap.setNomatch(new VoidAction());
+        keyMap.bind(new ExitAction(this), "q", KeyMap.esc() );
+        keyMap.bind(new SwitchToPageAction(this, consumersPage), ":c");
+        keyMap.bind(new SwitchToPageAction(this, topicsPage), ":t");
         return keyMap;
+    }
+
+    public TopicsPage getTopicsPage() {
+        return topicsPage;
     }
 }

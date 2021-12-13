@@ -14,7 +14,7 @@ public class SwitchToRecordsAction implements Action {
 
     @Override
     public void apply() {
-        var recordPage = new RecordPage(topicSupplier.get());
+        var recordPage = new RecordPage(application, topicSupplier.get());
         application.switchPage(recordPage);
     }
 }

@@ -5,7 +5,6 @@ import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.config.ConfigResource;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
-import org.jline.utils.InfoCmp;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
 import org.peekmoon.kafkat.tui.VerticalAlign;
@@ -16,7 +15,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-public class TopicsPage implements Page {
+public class TopicsPage extends Page {
 
     public static final String COL_NAME_RETENTION_TIME = "max time";
     public static final String COL_NAME_RETENTION_SIZE = "max size";
@@ -30,6 +29,7 @@ public class TopicsPage implements Page {
     private final Table table;
 
     public TopicsPage(Application application) {
+        super(application);
         this.application = application;
         this.table = new Table("topics");
         table.addColumn(COL_NAME_TOPIC_NAME, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);

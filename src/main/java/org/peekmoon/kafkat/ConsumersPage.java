@@ -4,7 +4,6 @@ import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
-import org.jline.utils.InfoCmp;
 import org.peekmoon.kafkat.tui.*;
 import org.peekmoon.kafkat.tui.VerticalAlign;
 
@@ -14,7 +13,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class ConsumersPage implements Page {
+public class ConsumersPage extends Page {
 
     private static final String COL_NAME_GROUP_ID = "id";
     private static final String COL_NAME_GROUP_STATE = "State";
@@ -22,7 +21,8 @@ public class ConsumersPage implements Page {
     private final AdminClient client;
     private final Table table;
 
-    public ConsumersPage() {
+    public ConsumersPage(Application application) {
+        super(application);
         this.table = new Table("consumers");
         table.addColumn(COL_NAME_GROUP_ID, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_GROUP_STATE, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
