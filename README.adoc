@@ -1,3 +1,8 @@
 == Install graalvm
 
 brew install --cask graalvm/tap/graalvm-ce-java17
+
+
+== Generate reflect-config.json
+
+java -agentlib:native-image-agent=config-output-dir=META-INF/native-image -jar target/kafkat-0.0.1.jar

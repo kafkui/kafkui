@@ -40,7 +40,6 @@
             <version>1.7.32</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -51,38 +50,50 @@
 
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>native</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>0.9.7.1</version>
+                        <extensions>true</extensions>
+                        <executions>
+                            <execution>
+                                <id>build-native</id>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+<!--                            <execution>-->
+<!--                                <id>test-native</id>-->
+<!--                                <goals>-->
+<!--                                    <goal>test</goal>-->
+<!--                                </goals>-->
+<!--                                <phase>test</phase>-->
+<!--                            </execution>-->
+                        </executions>
+                        <configuration>
+                            <buildArgs>
+                                <buildArg>--no-fallback</buildArg>
+                                <!-- cf https://github.com/oracle/graal/issues/3875 -->
+                                <buildArg>-J--add-exports=java.management/sun.management=ALL-UNNAMED</buildArg>
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <version>0.9.7.1</version>
-                <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>build-native</id>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-<!--                    <execution>-->
-<!--                        <id>test-native</id>-->
-<!--                        <goals>-->
-<!--                            <goal>test</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>test</phase>-->
-<!--                    </execution>-->
-                </executions>
-                <configuration>
-                    <buildArgs>
-                        <buildArg>--no-fallback</buildArg>
-                        <!-- cf https://github.com/oracle/graal/issues/3875 -->
-                        <buildArg>-J--add-exports=java.management/sun.management=ALL-UNNAMED</buildArg>
-                    </buildArgs>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

@@ -41,10 +41,7 @@ public class Application  {
         log.info("Starting app's");
 
         // Set a default handler to log all exceptions
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            org.slf4j.Logger log = LoggerFactory.getLogger(Application.class);
-            log.error("Uncaugh error", e);
-        });
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler());
 
 
         // Workaround terminal with TERM=screen-256color display bad frame border

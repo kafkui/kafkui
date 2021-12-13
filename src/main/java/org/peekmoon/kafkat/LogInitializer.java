@@ -11,27 +11,34 @@ public class LogInitializer {
 
         Logger rootLogger = Logger.getLogger("");
         String logDirectory = System.getProperty("log_directory");
-        String logFile = (logDirectory == null ? "/Users/j.lelong/Documents/perso/dev/kafkat/target" : logDirectory) + "/kafkat.log";
-        try {
-            FileHandler logHandler = new FileHandler(logFile, 5 * Mo,
-                    2, // one log file at a time
-                    true // if it exists: append, don't overwrite
-            );
-            Level defaultLevel = Level.INFO;
+        if (logDirectory == null) {
+            // Deactivating log
+            LogManager.getLogManager().reset();
+            Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);
+            globalLogger.setLevel(java.util.logging.Level.OFF);
+        } else {
+            String logFile = logDirectory + "/kafkat.log";
+            try {
+                FileHandler logHandler = new FileHandler(logFile, 5 * Mo,
+                        2, // one log file at a time
+                        true // if it exists: append, don't overwrite
+                );
+                Level defaultLevel = Level.INFO;
 
-            //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s [%3$s] %5$s %6$s%n");
-            logHandler.setFormatter(new KafkatFormatter());
-            logHandler.setLevel(java.util.logging.Level.FINE);
-            for (Handler h : rootLogger.getHandlers()) {
-                rootLogger.removeHandler(h);
+                //System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS.%1$tL %4$-7s [%3$s] %5$s %6$s%n");
+                logHandler.setFormatter(new KafkatFormatter());
+                logHandler.setLevel(java.util.logging.Level.FINE);
+                for (Handler h : rootLogger.getHandlers()) {
+                    rootLogger.removeHandler(h);
+                }
+                rootLogger.setLevel(defaultLevel);
+                rootLogger.addHandler(logHandler);
+
+                Logger.getLogger("org.peekmoon").setLevel(Level.ALL);
+
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
-            rootLogger.setLevel(defaultLevel);
-            rootLogger.addHandler(logHandler);
-
-            Logger.getLogger("org.peekmoon").setLevel(Level.ALL);
-
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
         }
 
     }
