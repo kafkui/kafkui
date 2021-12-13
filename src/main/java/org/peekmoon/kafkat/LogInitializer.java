@@ -1,21 +1,20 @@
 package org.peekmoon.kafkat;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.*;
 
 public class LogInitializer {
 
+    private static final int Mo = 1024 * 1024;
+
     public static void init() {
 
         Logger rootLogger = Logger.getLogger("");
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String logDirectory = System.getProperty("log_directory");
         String logFile = (logDirectory == null ? "/Users/j.lelong/Documents/perso/dev/kafkat/target" : logDirectory) + "/kafkat.log";
         try {
-            FileHandler logHandler = new FileHandler(logFile, 524288000, // 500 MB max size
-                    1, // one log file at a time
+            FileHandler logHandler = new FileHandler(logFile, 5 * Mo,
+                    2, // one log file at a time
                     true // if it exists: append, don't overwrite
             );
             Level defaultLevel = Level.INFO;

@@ -54,19 +54,10 @@ public class ConsumersPage implements Page {
     }
 
     @Override
-    public KeyMap<Application.Operation> getKeyMap(Terminal terminal) {
-        var keyMap = new KeyMap<Application.Operation>();
-        keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
-        keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
+    public KeyMap<Action> getKeyMap(Terminal terminal) {
+        var keyMap = new KeyMap<Action>();
+        TableKeyMapProvider.fill(table, keyMap, terminal);
         return keyMap;
-    }
-
-    @Override
-    public void process(Application.Operation op) {
-        switch (op) {
-            case UP -> table.selectUp();
-            case DOWN -> table.selectDown();
-        }
     }
 
     public void update(Admin admin) {

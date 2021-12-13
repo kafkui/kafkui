@@ -1,14 +1,17 @@
 package org.peekmoon.kafkat;
 
- import org.jline.terminal.Terminal;
+import org.jline.keymap.KeyMap;
+import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.peekmoon.kafkat.tui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
- import static org.jline.terminal.TerminalBuilder.PROP_DISABLE_ALTERNATE_CHARSET;
+import static org.jline.terminal.TerminalBuilder.PROP_DISABLE_ALTERNATE_CHARSET;
 
 public class Application  {
 
@@ -24,11 +27,14 @@ public class Application  {
         new Application().run();
     }
 
+    private final KeyMap<Action> keyMap = new KeyMap<>();
+    private Terminal terminal;
+    private boolean askQuit = false;
+    private BlockingQueue<Action> actions = new ArrayBlockingQueue<>(10);
     private KeyboardController keyboardController;
     private SwitchLayout switchLayout;
     private TopicsPage topicsPage;
     private ConsumersPage consumersPage;
-    private RecordPage recordPage;
     private Page currentPage;
 
     public void run() {
@@ -46,12 +52,19 @@ public class Application  {
         System.setProperty(PROP_DISABLE_ALTERNATE_CHARSET, "true");
 
 
-        try (Terminal terminal = TerminalBuilder.builder().build();
+        try (Terminal terminal = this.terminal = TerminalBuilder.builder().build();
              Display display = new Display(terminal, buildLayout())) {
 
+            keyMap.setAmbiguousTimeout(200);
+            keyMap.setNomatch(new VoidAction());
+            keyMap.bind(new ExitAction(this), "q", KeyMap.esc() );
+            keyMap.bind(new SwitchToPageAction(this, consumersPage), ":c");
+            keyMap.bind(new SwitchToPageAction(this, topicsPage), ":t");
 
-            // TODO : Better implementation as the action queue. The display thread should be using the action queue ?
-            keyboardController = new KeyboardController(terminal);
+            keyboardController = new KeyboardController(this, terminal, actions);
+            Thread keyboardThread = new Thread(keyboardController, "KeyboardThread");
+            keyboardThread.setDaemon(true);
+            keyboardThread.start();
 
             Thread displayThread = new Thread(display);
             displayThread.setDaemon(true);
@@ -61,32 +74,20 @@ public class Application  {
             switchLayout.switchTo(topicsPage.getId());
             keyboardController.setLocalKeyMap(topicsPage.getKeyMap(terminal));
             topicsPage.activate();
-            boolean askQuit = false;
             while (!askQuit){
-
-                Operation op = keyboardController.getEvent();
-                log.info("Receiving an new event {}", op);
-                switch (op) {
-                    case EXIT -> askQuit = true;
-                    case SWITCH_TO_CONSUMER -> switchPage(terminal, consumersPage);
-                    case SWITCH_TO_TOPICS -> switchPage(terminal, topicsPage);
-                    case SWITCH_TO_RECORDS -> {
-                        this.recordPage = new RecordPage(topicsPage.getCurrentTopic());
-                        switchPage(terminal, recordPage);
-                    }
-                }
-                currentPage.process(op);
+                // TODO : The display thread should be using the action queue ?
+                Action action = actions.take();
+                log.info("Receiving an new action {}/{}", action, actions.size());
+                action.apply();
             }
-
             currentPage.deactivate();
 
-
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private void switchPage(Terminal terminal, Page page) {
+    void switchPage(Page page) {
         switchLayout.add(page.getId(), page.getLayout());
         currentPage.deactivate();
         page.activate();
@@ -95,8 +96,13 @@ public class Application  {
         currentPage = page;
     }
 
+
+    void exit() {
+        askQuit = true;
+    }
+
     private InnerLayout buildLayout() {
-        this.topicsPage = new TopicsPage();
+        this.topicsPage = new TopicsPage(this);
         this.consumersPage = new ConsumersPage();
 
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
@@ -107,16 +113,7 @@ public class Application  {
     }
 
 
-    public enum Operation {
-        UP,
-        EXIT,
-        SEARCH,
-        DOWN,
-        NONE,
-        SWITCH_TO_TOPICS,
-        SWITCH_TO_CONSUMER,
-        SWITCH_TO_RECORDS
+    public KeyMap<Action> getKeyMap() {
+        return keyMap;
     }
-
-
 }

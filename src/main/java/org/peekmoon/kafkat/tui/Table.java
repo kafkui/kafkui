@@ -46,7 +46,6 @@ public class Table extends InnerLayout {
     }
 
     public void selectDown() {
-        log.info("Selecting down");
         int newOffset = selectableLayout.selectDown();
         scrollLayout.makeVisible(newOffset);
     }
@@ -111,7 +110,6 @@ public class Table extends InnerLayout {
     public AttributedStringBuilder render(int y) {
         return masterLayout.render(y);
     }
-
 
     private class Column {
         private final ScrollLayout titleLayout;

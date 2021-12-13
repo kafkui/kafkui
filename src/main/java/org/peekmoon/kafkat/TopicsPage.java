@@ -25,12 +25,13 @@ public class TopicsPage implements Page {
     public static final String COL_NAME_NB_REPLICA = "repl";
     public static final String COL_NAME_CLEANUP_POLICY = "policy";
 
+    private final Application application;
     private final AdminClient client;
     private final Table table;
 
-    public TopicsPage() {
+    public TopicsPage(Application application) {
+        this.application = application;
         this.table = new Table("topics");
-        //table.addColumn("uuid");
         table.addColumn(COL_NAME_TOPIC_NAME, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_NB_PARTITION, VerticalAlign.LEFT, StackSizeMode.SIZED, 5);
         table.addColumn(COL_NAME_NB_REPLICA, VerticalAlign.LEFT, StackSizeMode.SIZED, 5);
@@ -68,19 +69,11 @@ public class TopicsPage implements Page {
     }
 
     @Override
-    public KeyMap<Application.Operation> getKeyMap(Terminal terminal) {
-        var keyMap = new KeyMap<Application.Operation>();
-        keyMap.bind(Application.Operation.UP, KeyMap.key(terminal, InfoCmp.Capability.key_up));
-        keyMap.bind(Application.Operation.DOWN, KeyMap.key(terminal, InfoCmp.Capability.key_down));
+    public KeyMap<Action> getKeyMap(Terminal terminal) {
+        var keyMap = new KeyMap<Action>();
+        TableKeyMapProvider.fill(table, keyMap, terminal);
+        keyMap.bind(new SwitchToRecordsAction(application, table::getCurrentSelection), "\r");
         return keyMap;
-    }
-
-    @Override
-    public void process(Application.Operation op) {
-        switch (op) {
-            case UP -> table.selectUp();
-            case DOWN -> table.selectDown();
-        }
     }
 
     public String getCurrentTopic() {

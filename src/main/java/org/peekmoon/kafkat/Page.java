@@ -9,7 +9,5 @@ public interface Page {
     InnerLayout getLayout();
     void activate();
     void deactivate();
-    KeyMap<Application.Operation> getKeyMap(Terminal terminal);
-    void process(Application.Operation op);
-
+    KeyMap<Action> getKeyMap(Terminal terminal);
 }
