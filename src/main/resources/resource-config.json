@@ -1,7 +1,2 @@
 {
-  "resources": {
-    "includes": [
-      {"pattern": "logging.properties"}
-    ]
-  }
 }
