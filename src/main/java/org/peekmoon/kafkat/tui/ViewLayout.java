@@ -19,17 +19,17 @@ public class ViewLayout extends InnerLayout {
     private final static Logger log = LoggerFactory.getLogger(ViewLayout.class);
 
     private final Map<String, ViewItem> items;
-    private final VerticalAlign align;
+    private final HorizontalAlign align;
 
     private int width;
     private final List<String> order;
 
 
     public ViewLayout(String name) {
-        this(name, VerticalAlign.LEFT);
+        this(name, HorizontalAlign.LEFT);
     }
 
-    public ViewLayout(String name, VerticalAlign align) {
+    public ViewLayout(String name, HorizontalAlign align) {
         super(name);
         this.items = new HashMap<>();
         this.order = new ArrayList<>();
@@ -90,7 +90,7 @@ public class ViewLayout extends InnerLayout {
         }
     }
 
-    protected VerticalAlign getAlign() {
+    protected HorizontalAlign getAlign() {
         return align;
     }
 

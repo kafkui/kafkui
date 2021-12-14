@@ -1,5 +1,15 @@
 [
   {
+    "name": "org.peekmoon.kafkat.configuration.Configuration",
+    "methods":[{"name":"<init>","parameterTypes":[] }],
+    "allDeclaredFields": true
+  },
+  {
+    "name": "org.peekmoon.kafkat.configuration.ClusterConfiguration",
+    "methods":[{"name":"<init>","parameterTypes":[] }],
+    "allDeclaredFields": true
+  },
+  {
     "name":"org.apache.kafka.clients.consumer.CooperativeStickyAssignor",
     "methods":[{"name":"<init>","parameterTypes":[] }]
   },

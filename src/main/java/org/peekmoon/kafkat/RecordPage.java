@@ -2,6 +2,8 @@ package org.peekmoon.kafkat;
 
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
+import org.peekmoon.kafkat.action.Action;
+import org.peekmoon.kafkat.action.SwitchToPageAction;
 import org.peekmoon.kafkat.tui.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,21 +18,21 @@ public class RecordPage extends Page {
 
     private final static Logger log = LoggerFactory.getLogger(RecordPage.class);
 
-
     private final String topic;
+    private final TopicsPage topicsPage;
     private final Table table;
     private final ConsumerThread consumerThread;
     private final AtomicBoolean askingThreadStop;
 
 
-    public RecordPage(Application application, String topic) {
-
+    public RecordPage(Application application, TopicsPage topicsPage) {
         super(application);
-        this.topic = topic;
+        this.topicsPage = topicsPage;
+        this.topic = topicsPage.getCurrentTopic();
         this.table = new Table("records");
-        table.addColumn(COL_NAME_PARTITION, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
-        table.addColumn(COL_NAME_OFFSET, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
-        table.addColumn(COL_NAME_VALUE, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
+        table.addColumn(COL_NAME_PARTITION, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
+        table.addColumn(COL_NAME_OFFSET, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
+        table.addColumn(COL_NAME_VALUE, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
 
         this.askingThreadStop = new AtomicBoolean(false);
         consumerThread = new ConsumerThread(topic, table, askingThreadStop);
@@ -60,7 +62,7 @@ public class RecordPage extends Page {
     public KeyMap<Action> getKeyMap(Terminal terminal) {
         var keyMap = new KeyMap<Action>();
         TableKeyMapProvider.fill(table, keyMap, terminal);
-        keyMap.bind(new SwitchToPageAction(application, application.getTopicsPage()), KeyMap.esc(), KeyMap.del() );
+        keyMap.bind(new SwitchToPageAction(application, topicsPage), KeyMap.esc(), KeyMap.del() );
         return keyMap;
     }
 

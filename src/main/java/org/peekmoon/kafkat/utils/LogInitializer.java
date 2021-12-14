@@ -1,4 +1,4 @@
-package org.peekmoon.kafkat;
+package org.peekmoon.kafkat.utils;
 
 import java.io.*;
 import java.util.logging.*;

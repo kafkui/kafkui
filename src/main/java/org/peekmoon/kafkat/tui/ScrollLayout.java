@@ -9,7 +9,7 @@ public class ScrollLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(ScrollLayout.class);
 
-    private final VerticalAlign align;
+    private final HorizontalAlign align;
 
     private int minWidth, maxWidth;
     private int minHeight, maxHeight;
@@ -19,10 +19,10 @@ public class ScrollLayout extends InnerLayout {
     private final InnerLayout inner;
 
     public ScrollLayout(String name, InnerLayout inner) {
-        this(name, inner, VerticalAlign.LEFT);
+        this(name, inner, HorizontalAlign.LEFT);
     }
 
-    public ScrollLayout(String name, InnerLayout inner, VerticalAlign align) {
+    public ScrollLayout(String name, InnerLayout inner, HorizontalAlign align) {
         super(name);
         this.inner = inner;
         inner.setParent(this);

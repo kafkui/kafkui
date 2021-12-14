@@ -2,6 +2,7 @@ package org.peekmoon.kafkat;
 
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
+import org.peekmoon.kafkat.action.Action;
 import org.peekmoon.kafkat.tui.InnerLayout;
 
 public abstract class Page {

@@ -1,4 +1,7 @@
-package org.peekmoon.kafkat;
+package org.peekmoon.kafkat.action;
+
+import org.peekmoon.kafkat.Application;
+import org.peekmoon.kafkat.Page;
 
 public class SwitchToPageAction implements Action {
 

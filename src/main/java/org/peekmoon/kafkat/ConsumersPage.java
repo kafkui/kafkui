@@ -4,12 +4,12 @@ import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.common.KafkaFuture;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
+import org.peekmoon.kafkat.action.Action;
 import org.peekmoon.kafkat.tui.*;
-import org.peekmoon.kafkat.tui.VerticalAlign;
+import org.peekmoon.kafkat.tui.HorizontalAlign;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -18,20 +18,15 @@ public class ConsumersPage extends Page {
     private static final String COL_NAME_GROUP_ID = "id";
     private static final String COL_NAME_GROUP_STATE = "State";
 
-    private final AdminClient client;
+    private final Admin kafkaAdmin;
     private final Table table;
 
     public ConsumersPage(Application application) {
         super(application);
+        this.kafkaAdmin = application.getKafkaAdmin();
         this.table = new Table("consumers");
-        table.addColumn(COL_NAME_GROUP_ID, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
-        table.addColumn(COL_NAME_GROUP_STATE, VerticalAlign.LEFT, StackSizeMode.SIZED, 10);
-
-        // TODO : Only one client for all pages
-        Properties config = new Properties();
-        //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
-        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
-        client = AdminClient.create(config);
+        table.addColumn(COL_NAME_GROUP_ID, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
+        table.addColumn(COL_NAME_GROUP_STATE, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
     }
 
     public InnerLayout getLayout() {
@@ -45,7 +40,7 @@ public class ConsumersPage extends Page {
 
     @Override
     public void activate() {
-        update(client);
+        update();
     }
 
     @Override
@@ -60,11 +55,10 @@ public class ConsumersPage extends Page {
         return keyMap;
     }
 
-    public void update(Admin admin) {
+    private void update() {
         try {
-
-            admin.listConsumerGroups().all()
-                    .thenApply(c -> askConsumerDescription(admin, c))
+            kafkaAdmin.listConsumerGroups().all()
+                    .thenApply(c -> askConsumerDescription(kafkaAdmin, c))
                     .get()
                     .thenApply(this::updateConsumer)
                     .get();

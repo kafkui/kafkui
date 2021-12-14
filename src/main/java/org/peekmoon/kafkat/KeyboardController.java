@@ -4,6 +4,7 @@ import org.jline.keymap.BindingReader;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
 import org.jline.utils.NonBlockingReader;
+import org.peekmoon.kafkat.action.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

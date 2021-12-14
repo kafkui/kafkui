@@ -5,14 +5,15 @@ import org.apache.kafka.common.KafkaFuture;
 import org.apache.kafka.common.config.ConfigResource;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
+import org.peekmoon.kafkat.action.Action;
+import org.peekmoon.kafkat.action.SwitchToRecordsAction;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
-import org.peekmoon.kafkat.tui.VerticalAlign;
+import org.peekmoon.kafkat.tui.HorizontalAlign;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 public class TopicsPage extends Page {
@@ -24,25 +25,19 @@ public class TopicsPage extends Page {
     public static final String COL_NAME_NB_REPLICA = "repl";
     public static final String COL_NAME_CLEANUP_POLICY = "policy";
 
-    private final Application application;
-    private final AdminClient client;
+    private final Admin kafkaAdmin;
     private final Table table;
 
     public TopicsPage(Application application) {
         super(application);
-        this.application = application;
+        this.kafkaAdmin = application.getKafkaAdmin();
         this.table = new Table("topics");
-        table.addColumn(COL_NAME_TOPIC_NAME, VerticalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
-        table.addColumn(COL_NAME_NB_PARTITION, VerticalAlign.LEFT, StackSizeMode.SIZED, 5);
-        table.addColumn(COL_NAME_NB_REPLICA, VerticalAlign.LEFT, StackSizeMode.SIZED, 5);
-        table.addColumn(COL_NAME_CLEANUP_POLICY, VerticalAlign.LEFT, StackSizeMode.SIZED, 8);
-        table.addColumn(COL_NAME_RETENTION_TIME, VerticalAlign.RIGHT, StackSizeMode.SIZED, 15);
-        table.addColumn(COL_NAME_RETENTION_SIZE, VerticalAlign.RIGHT, StackSizeMode.SIZED, 10);
-
-        Properties config = new Properties();
-        //config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9193");
-        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "breisen.datamix.ovh:9093");
-        client = AdminClient.create(config);
+        table.addColumn(COL_NAME_TOPIC_NAME, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
+        table.addColumn(COL_NAME_NB_PARTITION, HorizontalAlign.LEFT, StackSizeMode.SIZED, 5);
+        table.addColumn(COL_NAME_NB_REPLICA, HorizontalAlign.LEFT, StackSizeMode.SIZED, 5);
+        table.addColumn(COL_NAME_CLEANUP_POLICY, HorizontalAlign.LEFT, StackSizeMode.SIZED, 8);
+        table.addColumn(COL_NAME_RETENTION_TIME, HorizontalAlign.RIGHT, StackSizeMode.SIZED, 15);
+        table.addColumn(COL_NAME_RETENTION_SIZE, HorizontalAlign.RIGHT, StackSizeMode.SIZED, 10);
     }
 
     @Override
@@ -60,7 +55,7 @@ public class TopicsPage extends Page {
 
     @Override
     public void activate() {
-        update(client);
+        update();
     }
 
     @Override
@@ -72,7 +67,7 @@ public class TopicsPage extends Page {
     public KeyMap<Action> getKeyMap(Terminal terminal) {
         var keyMap = new KeyMap<Action>();
         TableKeyMapProvider.fill(table, keyMap, terminal);
-        keyMap.bind(new SwitchToRecordsAction(application, table::getCurrentSelection), "\r");
+        keyMap.bind(new SwitchToRecordsAction(application, this), "\r");
         return keyMap;
     }
 
@@ -80,10 +75,10 @@ public class TopicsPage extends Page {
         return table.getCurrentSelection();
     }
 
-    public void update(AdminClient client)  {
+    public void update()  {
 
         try {
-            var topicListing = client.listTopics().listings().get();
+            var topicListing = kafkaAdmin.listTopics().listings().get();
 
             var configResourceList = new ArrayList<ConfigResource>();
             var topicsName = new ArrayList<String>();
@@ -95,8 +90,8 @@ public class TopicsPage extends Page {
             }
 
             KafkaFuture.allOf(
-                    client.describeTopics(topicsName).all().thenApply(this::updateTopicsDescription),
-                    client.describeConfigs(configResourceList).all().thenApply(this::updateTopicsConfig)
+                    kafkaAdmin.describeTopics(topicsName).all().thenApply(this::updateTopicsDescription),
+                    kafkaAdmin.describeConfigs(configResourceList).all().thenApply(this::updateTopicsConfig)
             ).get();
 
         } catch (ExecutionException | InterruptedException e) {

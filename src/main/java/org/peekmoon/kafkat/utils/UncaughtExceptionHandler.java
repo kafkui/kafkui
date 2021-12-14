@@ -1,5 +1,6 @@
-package org.peekmoon.kafkat;
+package org.peekmoon.kafkat.utils;
 
+import org.peekmoon.kafkat.Application;
 import org.slf4j.LoggerFactory;
 
 import java.lang.management.ManagementFactory;
@@ -11,8 +12,8 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
     @Override
     public void uncaughtException(Thread t, Throwable e) {
         org.slf4j.Logger log = LoggerFactory.getLogger(Application.class);
-        log.error("Uncaugh error", e);
-        System.err.println("uncaugh error : " + e.getMessage());
+        log.error("Uncaught error", e);
+        System.err.println("uncaught error : " + e.getMessage());
         e.printStackTrace(System.err);
         System.err.println("THREAD DUMP:");
         System.err.println(generateThreadDump());

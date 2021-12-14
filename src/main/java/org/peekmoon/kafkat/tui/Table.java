@@ -55,7 +55,7 @@ public class Table extends InnerLayout {
         return keys.get(selectedOffet);
     }
 
-    public void addColumn(String title, VerticalAlign align, StackSizeMode mode, int value) {
+    public void addColumn(String title, HorizontalAlign align, StackSizeMode mode, int value) {
         var col = new Column(title, align);
         contentLayout.add(col.getLayout(), mode, value);
         columns.add(col);
@@ -117,7 +117,7 @@ public class Table extends InnerLayout {
         private final ScrollLayout scroller;
 
 
-        private Column(String title, VerticalAlign align) {
+        private Column(String title, HorizontalAlign align) {
             var titleLayout = new ViewLayout("col-" + title + "-content", align);
             titleLayout.putItem("Title",title, AttributedStyle.BOLD);
             this.titleLayout = new ScrollLayout("col-" + title + "-title",titleLayout, align);

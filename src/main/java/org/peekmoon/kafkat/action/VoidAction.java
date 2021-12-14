@@ -1,4 +1,4 @@
-package org.peekmoon.kafkat;
+package org.peekmoon.kafkat.action;
 
 public class VoidAction implements Action {
 
