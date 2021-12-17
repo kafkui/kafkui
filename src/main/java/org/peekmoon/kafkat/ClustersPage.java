@@ -5,23 +5,22 @@ import org.jline.terminal.Terminal;
 import org.peekmoon.kafkat.action.Action;
 import org.peekmoon.kafkat.action.OpenClusterAction;
 import org.peekmoon.kafkat.configuration.ClusterConfiguration;
+import org.peekmoon.kafkat.configuration.Configuration;
+import org.peekmoon.kafkat.tui.HorizontalAlign;
 import org.peekmoon.kafkat.tui.InnerLayout;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
-import org.peekmoon.kafkat.tui.HorizontalAlign;
-
-import java.util.List;
 
 public class ClustersPage extends Page {
 
     private static final String COL_NAME_CLUSTER_NAME = "name";
     private static final String COL_NAME_BOOTSTRAP = "bootstrap servers";
     private final Table table;
-    private final List<ClusterConfiguration> clusters;
+    private Configuration configuration;
 
-    public ClustersPage(Application application, List<ClusterConfiguration> clusters) {
+    public ClustersPage(Application application, Configuration configuration) {
         super(application);
-        this.clusters = clusters;
+        this.configuration = configuration;
         this.table = new Table("clusters");
         table.addColumn(COL_NAME_CLUSTER_NAME, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
         table.addColumn(COL_NAME_BOOTSTRAP, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
@@ -41,6 +40,8 @@ public class ClustersPage extends Page {
     @Override
     protected void update() {
         // FIXME : Remove old values
+        this.configuration = Configuration.read();
+        var clusters = configuration.clusters;
         for (int i = 0; i < clusters.size(); i++) {
             var cluster = clusters.get(i);
             table.putRow(Integer.toString(i), cluster.name, cluster.bootstrapServers.get(0));
@@ -57,7 +58,7 @@ public class ClustersPage extends Page {
 
     public ClusterConfiguration getCurrentCluster() {
         int clusterIdx = Integer.parseInt(table.getCurrentSelection());
-        return clusters.get(clusterIdx);
+        return configuration.clusters.get(clusterIdx);
     }
 
 }

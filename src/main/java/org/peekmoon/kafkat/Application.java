@@ -111,7 +111,7 @@ public class Application  {
     }
 
     private InnerLayout buildLayout(Configuration configuration) {
-        this.clustersPage = new ClustersPage(this, configuration.clusters);
+        this.clustersPage = new ClustersPage(this, configuration);
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
         var mainLayout = new FrameLayout("FrameAroundMainSwitch", switchLayout);
         switchLayout.add(clustersPage.getId(), clustersPage.getLayout());
