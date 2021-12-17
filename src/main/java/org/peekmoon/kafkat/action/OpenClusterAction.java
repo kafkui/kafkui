@@ -18,8 +18,9 @@ public class OpenClusterAction implements Action {
 
     @Override
     public void apply() {
-        application.openKafkaAdmin(clusterSupplier.get());
-        var topicsPage = new TopicsPage(application);
+        // FIXME : Memory leak
+        var admin = application.openKafkaAdmin(clusterSupplier.get());
+        var topicsPage = new TopicsPage(application, admin);
         application.switchPage(topicsPage);
     }
 }

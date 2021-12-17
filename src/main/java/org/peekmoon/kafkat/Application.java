@@ -7,7 +7,6 @@ import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 import org.peekmoon.kafkat.action.Action;
 import org.peekmoon.kafkat.action.ExitAction;
-import org.peekmoon.kafkat.action.SwitchToPageAction;
 import org.peekmoon.kafkat.action.VoidAction;
 import org.peekmoon.kafkat.configuration.ClusterConfiguration;
 import org.peekmoon.kafkat.configuration.Configuration;
@@ -41,14 +40,12 @@ public class Application  {
         new Application().run(Configuration.read());
     }
 
+    private final BlockingQueue<Action> actions = new ArrayBlockingQueue<>(10);
     private Terminal terminal;
-    private Admin kafkaAdmin;
     private boolean askQuit = false;
-    private BlockingQueue<Action> actions = new ArrayBlockingQueue<>(10);
     private KeyboardController keyboardController;
     private SwitchLayout switchLayout;
     private ClustersPage clustersPage;
-    private ConsumersPage consumersPage;
     private Page currentPage;
 
     public void run(Configuration configuration) {
@@ -62,8 +59,7 @@ public class Application  {
         System.setProperty(PROP_DISABLE_ALTERNATE_CHARSET, "true");
 
 
-        try (var ignored  = openKafkaAdmin(configuration.clusters.get(0));
-             var terminal = this.terminal = TerminalBuilder.builder().build();
+        try (var terminal = this.terminal = TerminalBuilder.builder().build();
              var display = new Display(terminal, buildLayout(configuration))) {
 
             keyboardController = new KeyboardController(this, terminal, actions);
@@ -97,7 +93,7 @@ public class Application  {
     public Admin openKafkaAdmin(ClusterConfiguration cluster) {
         Properties config = new Properties();
         config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers);
-        return kafkaAdmin = Admin.create(config);
+        return Admin.create(config);
     }
 
     public void switchPage(Page page) {
@@ -115,16 +111,12 @@ public class Application  {
     }
 
     private InnerLayout buildLayout(Configuration configuration) {
-        this.consumersPage = new ConsumersPage(this);
         this.clustersPage = new ClustersPage(this, configuration.clusters);
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
         var mainLayout = new FrameLayout("FrameAroundMainSwitch", switchLayout);
-        switchLayout.add(consumersPage.getId(), consumersPage.getLayout());
         switchLayout.add(clustersPage.getId(), clustersPage.getLayout());
         return mainLayout;
     }
-
-
 
 
     public KeyMap<Action> buildKeyMap() {
@@ -132,11 +124,8 @@ public class Application  {
         keyMap.setAmbiguousTimeout(100);
         keyMap.setNomatch(new VoidAction());
         keyMap.bind(new ExitAction(this), "q", KeyMap.esc() );
-        keyMap.bind(new SwitchToPageAction(this, consumersPage), ":c");
+        //keyMap.bind(new SwitchToPageAction(this, consumersPage), ":c");
         return keyMap;
     }
 
-    public Admin getKafkaAdmin() {
-        return kafkaAdmin;
-    }
 }

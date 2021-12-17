@@ -28,9 +28,9 @@ public class TopicsPage extends Page {
     private final Admin kafkaAdmin;
     private final Table table;
 
-    public TopicsPage(Application application) {
+    public TopicsPage(Application application, Admin kafkaAdmim) {
         super(application);
-        this.kafkaAdmin = application.getKafkaAdmin();
+        this.kafkaAdmin = kafkaAdmim;
         this.table = new Table("topics");
         table.addColumn(COL_NAME_TOPIC_NAME, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_NB_PARTITION, HorizontalAlign.LEFT, StackSizeMode.SIZED, 5);

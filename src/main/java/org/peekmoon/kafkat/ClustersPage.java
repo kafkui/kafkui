@@ -39,16 +39,12 @@ public class ClustersPage extends Page {
     }
 
     @Override
-    void activate() {
+    protected void update() {
+        // FIXME : Remove old values
         for (int i = 0; i < clusters.size(); i++) {
             var cluster = clusters.get(i);
             table.putRow(Integer.toString(i), cluster.name, cluster.bootstrapServers.get(0));
         }
-    }
-
-    @Override
-    void deactivate() {
-
     }
 
     @Override

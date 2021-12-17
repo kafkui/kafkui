@@ -21,9 +21,9 @@ public class ConsumersPage extends Page {
     private final Admin kafkaAdmin;
     private final Table table;
 
-    public ConsumersPage(Application application) {
+    public ConsumersPage(Application application, Admin kafkaAdmin) {
         super(application);
-        this.kafkaAdmin = application.getKafkaAdmin();
+        this.kafkaAdmin = kafkaAdmin;
         this.table = new Table("consumers");
         table.addColumn(COL_NAME_GROUP_ID, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_GROUP_STATE, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
@@ -39,23 +39,7 @@ public class ConsumersPage extends Page {
     }
 
     @Override
-    public void activate() {
-        update();
-    }
-
-    @Override
-    public void deactivate() {
-
-    }
-
-    @Override
-    public KeyMap<Action> getKeyMap(Terminal terminal) {
-        var keyMap = new KeyMap<Action>();
-        TableKeyMapProvider.fill(table, keyMap, terminal);
-        return keyMap;
-    }
-
-    private void update() {
+    public void update() {
         try {
             kafkaAdmin.listConsumerGroups().all()
                     .thenApply(c -> askConsumerDescription(kafkaAdmin, c))
@@ -66,6 +50,13 @@ public class ConsumersPage extends Page {
         } catch (ExecutionException | InterruptedException e) {
             throw new IllegalStateException("Unable to retrive topics data", e);
         }
+    }
+
+    @Override
+    public KeyMap<Action> getKeyMap(Terminal terminal) {
+        var keyMap = new KeyMap<Action>();
+        TableKeyMapProvider.fill(table, keyMap, terminal);
+        return keyMap;
     }
 
     private KafkaFuture<Map<String, ConsumerGroupDescription>> askConsumerDescription(Admin admin, Collection<ConsumerGroupListing> consumers) {
