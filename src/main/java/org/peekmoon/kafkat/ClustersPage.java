@@ -11,16 +11,17 @@ import org.peekmoon.kafkat.tui.InnerLayout;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
 
+import java.util.List;
+
 public class ClustersPage extends Page {
 
     private static final String COL_NAME_CLUSTER_NAME = "name";
     private static final String COL_NAME_BOOTSTRAP = "bootstrap servers";
     private final Table table;
-    private Configuration configuration;
+    private List<ClusterConfiguration> clusters;
 
-    public ClustersPage(Application application, Configuration configuration) {
+    public ClustersPage(Application application) {
         super(application);
-        this.configuration = configuration;
         this.table = new Table("clusters");
         table.addColumn(COL_NAME_CLUSTER_NAME, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
         table.addColumn(COL_NAME_BOOTSTRAP, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
@@ -39,12 +40,15 @@ public class ClustersPage extends Page {
 
     @Override
     protected void update() {
-        // FIXME : Remove old values
-        this.configuration = Configuration.read();
-        var clusters = configuration.clusters;
+        clusters = Configuration.read().clusters;
+
+        int  nbEntry = table.length();
         for (int i = 0; i < clusters.size(); i++) {
             var cluster = clusters.get(i);
             table.putRow(Integer.toString(i), cluster.name, cluster.bootstrapServers.get(0));
+        }
+        for (int i=clusters.size(); i<nbEntry; i++) {
+            table.removeRow(Integer.toString(i));
         }
     }
 
@@ -56,9 +60,9 @@ public class ClustersPage extends Page {
         return keyMap;
     }
 
-    public ClusterConfiguration getCurrentCluster() {
+    private ClusterConfiguration getCurrentCluster() {
         int clusterIdx = Integer.parseInt(table.getCurrentSelection());
-        return configuration.clusters.get(clusterIdx);
+        return clusters.get(clusterIdx);
     }
 
 }

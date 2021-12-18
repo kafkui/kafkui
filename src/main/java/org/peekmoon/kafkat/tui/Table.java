@@ -5,10 +5,7 @@ import org.jline.utils.AttributedStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Table extends InnerLayout {
 
@@ -87,6 +84,19 @@ public class Table extends InnerLayout {
         invalidate();
     }
 
+    public synchronized void removeRow(String key) {
+        if (!keys.contains(key)) {
+            throw new IllegalArgumentException("Unable to find key " + key);
+        }
+        keys.remove(key);
+        columnMap.values().forEach(c -> c.removeItem(key));
+        invalidate();
+    }
+
+    public synchronized int length() {
+        return keys.size();
+    }
+
     @Override
     public int getWidth() {
         return masterLayout.getWidth();
@@ -110,6 +120,7 @@ public class Table extends InnerLayout {
     public AttributedStringBuilder render(int y) {
         return masterLayout.render(y);
     }
+
 
     private class Column {
         private final ScrollLayout titleLayout;
@@ -136,6 +147,10 @@ public class Table extends InnerLayout {
             scroller.setMinWidth(contentLayout.getWidth());
             scroller.setMaxHeight(contentLayout.getHeight());
             scroller.setMinHeight(contentLayout.getHeight());
+        }
+
+        public void removeItem(String key) {
+            contentLayout.removeItem(key);
         }
 
         public InnerLayout getTitleLayout() {

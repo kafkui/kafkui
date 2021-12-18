@@ -84,6 +84,13 @@ public class ViewLayout extends InnerLayout {
         }
     }
 
+    public synchronized void removeItem(String key) {
+        if (!order.remove(key) || items.remove(key) == null) {
+            throw new IllegalArgumentException("Unable to remove key " + key);
+        }
+
+    }
+
     public void setOrder(List<String> keyOrder) {
         if (keyOrder.size() != items.size()) {
             throw new IllegalArgumentException("Only supported total ordering " + keyOrder.size() +"<>" + items.size());
@@ -93,5 +100,6 @@ public class ViewLayout extends InnerLayout {
     protected HorizontalAlign getAlign() {
         return align;
     }
+
 
 }

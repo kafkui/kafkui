@@ -37,7 +37,7 @@ public class Application  {
 
     public static void main(String[] args) {
 
-        new Application().run(Configuration.read());
+        new Application().run();
     }
 
     private final BlockingQueue<Action> actions = new ArrayBlockingQueue<>(10);
@@ -48,7 +48,7 @@ public class Application  {
     private ClustersPage clustersPage;
     private Page currentPage;
 
-    public void run(Configuration configuration) {
+    public void run() {
 
         log.info("Starting app's");
 
@@ -60,7 +60,7 @@ public class Application  {
 
 
         try (var terminal = this.terminal = TerminalBuilder.builder().build();
-             var display = new Display(terminal, buildLayout(configuration))) {
+             var display = new Display(terminal, buildLayout())) {
 
             keyboardController = new KeyboardController(this, terminal, actions);
             Thread keyboardThread = new Thread(keyboardController, "KeyboardThread");
@@ -110,8 +110,8 @@ public class Application  {
         askQuit = true;
     }
 
-    private InnerLayout buildLayout(Configuration configuration) {
-        this.clustersPage = new ClustersPage(this, configuration);
+    private InnerLayout buildLayout() {
+        this.clustersPage = new ClustersPage(this);
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
         var mainLayout = new FrameLayout("FrameAroundMainSwitch", switchLayout);
         switchLayout.add(clustersPage.getId(), clustersPage.getLayout());
