@@ -13,8 +13,8 @@ public abstract class InnerLayout implements Layout {
     }
 
     @Override
-    public void invalidate() {
-        getParent().invalidate();
+    public void invalidate(boolean resizing) {
+        getParent().invalidate(resizing);
     }
 
     @Override

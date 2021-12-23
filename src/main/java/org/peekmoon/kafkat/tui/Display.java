@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.jline.utils.InfoCmp.Capability.*;
 
@@ -22,9 +20,14 @@ public class Display implements Runnable, Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(Display.class);
 
+    private enum Event {
+        REDRAW,
+        RESIZE_AND_REDRAW,
+        STOP
+    }
+
     private final Terminal terminal;
-    private final AtomicBoolean askStop;
-    private final BlockingQueue<String> invalidate;
+    private final BlockingQueue<Event> events;
     private final Terminal.SignalHandler prevWinchHandler;
     private final Attributes savedAttributes;
     private final org.jline.utils.Display display;
@@ -36,67 +39,66 @@ public class Display implements Runnable, Closeable {
         this.terminal = terminal;
         this.layout = new RootLayout(this, layout);
 
-        this.askStop = new AtomicBoolean(false);
-        this.invalidate = new LinkedBlockingQueue<>(1);
+        this.events = new LinkedBlockingQueue<>(100);
 
         this.display = new org.jline.utils.Display(terminal, true);
 
-        prevWinchHandler = terminal.handle(Terminal.Signal.WINCH, this::resize);
+        prevWinchHandler = terminal.handle(Terminal.Signal.WINCH, signal -> invalidate(true));
         savedAttributes = terminal.enterRawMode();
         terminal.puts(cursor_invisible);
         terminal.puts(enter_ca_mode);
         terminal.puts(keypad_xmit);
         terminal.flush();
-
-        resize();
-    }
-
-    public void resize() {
-        resize(Terminal.Signal.WINCH);
-    }
-
-    private synchronized void resize(Terminal.Signal signal) {
-        log.info("Resizing");
-        size.copy(terminal.getSize());
-        display.resize(size.getRows(), size.getColumns());
-        display.clear();
-        layout.resize(size.getColumns(), size.getRows());
-        invalidate();
-        log.info("Resize done");
+        invalidate(true);
     }
 
     @Override
     public void run() {
         try {
-            while (!askStop.get()) {
-                if (invalidate.poll(200, TimeUnit.MILLISECONDS) != null) {
-                    synchronized (this) {
-                        log.info("Drawing...");
-                        display.reset(); // FIXME : Workaround : https://github.com/jline/jline3/issues/737
-                        List<AttributedString> lines = render();
-                        display.update(lines, 0);
-                        log.info("Draw done");
+            Event event;
+            do {
+                event = events.take();
+                log.debug("Event : {}/{}", event, events.size());
+                synchronized (this) {
+                    switch (event) {
+                        case RESIZE_AND_REDRAW -> {
+                            resize();
+                            redraw();
+                        }
+                        case REDRAW -> redraw();
                     }
+                    log.debug("Event done");
                 }
-            }
-        } catch(InterruptedException e){
-            log.info("Display asked to stop", e);
-        }
+            } while (event != Event.STOP);
 
+        } catch(InterruptedException e){
+            log.info("Display loop interrupted", e);
+        }
     }
 
-    private List<AttributedString> render() {
-        List<AttributedString> result = new ArrayList<>();
+
+    private void resize() {
+        log.info("Resizing");
+        size.copy(terminal.getSize());
+        display.resize(size.getRows(), size.getColumns());
+        layout.resize(size.getColumns(), size.getRows());
+        log.info("Resize done");
+    }
+
+
+    private void redraw() {
+        display.reset(); // FIXME : Workaround : https://github.com/jline/jline3/issues/737
+        List<AttributedString> lines = new ArrayList<>();
         for (int y=0; y<layout.getHeight(); y++) {
-            result.add(layout.render(y).toAttributedString());
+            lines.add(layout.render(y).toAttributedString());
         }
-        return result;
+        display.update(lines, 0);
     }
 
     @Override
     public void close() throws IOException {
         log.info("Closing");
-        askStop.set(true);
+        events.add(Event.STOP);
         terminal.setAttributes(savedAttributes);
         terminal.handle(Terminal.Signal.WINCH, prevWinchHandler);
         terminal.puts(exit_ca_mode);
@@ -107,11 +109,22 @@ public class Display implements Runnable, Closeable {
     }
 
 
-    // Use a queue allow to have only one drawing at a time and aggragate all requests
-    // TODO : Thinks to a less hacky implementation
-    public void invalidate() {
-        //noinspection ResultOfMethodCallIgnored
-        invalidate.offer("dummy");
+    public void invalidate(boolean resizing) {
+        synchronized (events) {
+            if (resizing) {
+                if (!events.contains(Event.RESIZE_AND_REDRAW)) {
+                    events.add(Event.RESIZE_AND_REDRAW);
+                }
+                // Removing all remaining REDRAW event from queue, because they becoming useless
+                events.removeIf(e -> e == Event.REDRAW) ;
+
+            } else { // Only a redraw
+                // If queue contain an resize and redraw or already contains a redraw no need to redraw now
+                if (!events.contains(Event.RESIZE_AND_REDRAW) && !events.contains(Event.REDRAW)) {
+                    events.add(Event.REDRAW);
+                }
+            }
+        }
     }
 
 

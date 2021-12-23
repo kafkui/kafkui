@@ -23,13 +23,15 @@ public class Table extends InnerLayout {
 
     public Table(String name) {
         super("table-" + name);
+
+        // Two stack the titles Line + All the content
         this.masterLayout = new StackVerticalLayout("master-Vertical-" + name);
 
-        this.titlesLayout = new StackHorizontalLayout("title-" + name);
+        this.titlesLayout = new StackHorizontalLayout("title-" + name);    // Stack all the columns title
+        this.contentLayout = new StackHorizontalLayout("content-" + name); // Stack all the columns content
 
-        this.contentLayout = new StackHorizontalLayout("content-" + name);
         this.selectableLayout = new SelectableLayout(contentLayout);
-        this.scrollLayout = new ScrollLayout(  "scroll-" + getName(), selectableLayout);
+        this.scrollLayout = new ScrollLayout(  "scroll-" + getName(), selectableLayout); // All the content (main scroll)
 
         this.masterLayout.add(titlesLayout, StackSizeMode.SIZED, 1);
         this.masterLayout.add(scrollLayout, StackSizeMode.PROPORTIONAL, 1);
@@ -70,7 +72,8 @@ public class Table extends InnerLayout {
         for (int noCol = 0; noCol<columns.size(); noCol++) {
             columns.get(noCol).putItem(key, cols[noCol]);
         }
-        invalidate();
+        resize(masterLayout.getWidth(), masterLayout.getHeight());
+        invalidate(true); // TODO : not resize if size don't change
     }
 
     public synchronized void putValue(String key, String colName, String value) {
@@ -81,7 +84,7 @@ public class Table extends InnerLayout {
            columnMap.forEach((k,c) -> c.putItem(key, "?"));
         }
         column.putItem(key, value);
-        invalidate();
+        invalidate(true); // TODO : not resize if size don't change
     }
 
     public synchronized void removeRow(String key) {
@@ -90,7 +93,7 @@ public class Table extends InnerLayout {
         }
         keys.remove(key);
         columnMap.values().forEach(c -> c.removeItem(key));
-        invalidate();
+        invalidate(true); // TODO : not resize if size don't change
     }
 
     public synchronized int length() {

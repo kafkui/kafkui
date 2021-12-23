@@ -8,7 +8,7 @@ public interface Layout {
      int getHeight();
      void resize(int width, int height);
      AttributedStringBuilder render(int y);
-     void invalidate();
+     void invalidate(boolean resizing);
      String getName(); // Used for debug purpose
 
 }

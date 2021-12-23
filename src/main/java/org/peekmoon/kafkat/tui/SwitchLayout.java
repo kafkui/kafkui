@@ -36,7 +36,7 @@ public class SwitchLayout extends InnerLayout {
             throw new IllegalArgumentException("Unknown layout " + name);
         }
         currentLayout = child;
-        invalidate();
+        invalidate(false);
     }
 
     @Override

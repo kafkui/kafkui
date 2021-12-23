@@ -8,6 +8,7 @@ class ViewItem {
     private final ViewLayout parent;
     private final String key;
     private int width;
+    private int contentWidth;
     private AttributedStringBuilder line;
 
     ViewItem(ViewLayout parent, String key, String value) {
@@ -25,14 +26,13 @@ class ViewItem {
     }
 
     void setValue(String value) {
-        line = new AttributedStringBuilder().append(value);
-        setValue(line);
-
+        setValue(new AttributedStringBuilder().append(value));
     }
 
     void setValue(AttributedStringBuilder line) {
         this.line = line;
-        this.width = Math.max(line.columnLength(), width);
+        contentWidth = line.columnLength();
+        width = Math.max(line.columnLength(), width);
         adjustLineLength();
     }
 
@@ -45,14 +45,17 @@ class ViewItem {
         return width;
     }
 
+    int getContentWidth() {
+        return contentWidth;
+    }
+
     AttributedStringBuilder render() {
         return line;
     }
 
     private void adjustLineLength() {
-        var length = line.columnLength();
-        if (length < width) {
-            String padding = " ".repeat(width - length);
+        if (contentWidth < width) {
+            String padding = " ".repeat(width - contentWidth);
             switch (parent.getAlign()) {
                 case LEFT -> line.append(padding);
                 case RIGHT -> line = new AttributedStringBuilder().append(padding).append(line);
@@ -60,4 +63,7 @@ class ViewItem {
         }
     }
 
+    public String getKey() {
+        return key;
+    }
 }

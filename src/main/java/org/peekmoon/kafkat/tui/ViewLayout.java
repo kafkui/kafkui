@@ -5,10 +5,7 @@ import org.jline.utils.AttributedStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /***
  * A vertical list of items. Every item is a line on terminal.
@@ -22,6 +19,7 @@ public class ViewLayout extends InnerLayout {
     private final HorizontalAlign align;
 
     private int width;
+    private ViewItem longestItem;
     private final List<String> order;
 
 
@@ -47,6 +45,10 @@ public class ViewLayout extends InnerLayout {
         return items.size();
     }
 
+    /***
+     * A View layout have always the width of it longest element
+     * and the height equal to the number of elements in it
+     */
     @Override
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
@@ -65,8 +67,12 @@ public class ViewLayout extends InnerLayout {
     }
 
     // FIXME : Synchronize with rezising and drawing
-    // TODO : Reduce width if removing the longest value
+
+    /***
+     * Add an item to this viewLayout, synchronizing same width, based on longest item, on all inner viewItem
+     */
     public synchronized void putItem(String key, String value, AttributedStyle style) {
+        // Add item to structure
         var item = items.get(key);
         if (item == null) {
             item = new ViewItem(this, key, value, style);
@@ -75,15 +81,27 @@ public class ViewLayout extends InnerLayout {
         } else {
             item.setValue(value);
         }
-        var newItemWidth = item.getWidth();
-        if (newItemWidth > width) {
-            items.values().forEach(i -> i.setWidth(newItemWidth));
-            width = newItemWidth;
+
+
+        // Update new layout width
+        var newItemContentWidth = item.getContentWidth();
+        if (newItemContentWidth > width) {
+            longestItem = item;
+            items.values().forEach(i -> i.setWidth(newItemContentWidth)); // Update width of all
+            width = newItemContentWidth;
+        } else  if (key.equals(longestItem.getKey())) { // We are reducing the longst item
+            // Find the new longest one
+            longestItem = items.values().stream().max(Comparator.comparingInt(ViewItem::getContentWidth)).get();
+            int newMaxContentWidth = longestItem.getContentWidth();
+            items.values().forEach(i -> i.setWidth(newMaxContentWidth)); // Update width of all
+            width = newMaxContentWidth;
         } else {
             item.setWidth(width);
         }
+
     }
 
+    // FIXME: Resize when remove longest item
     public synchronized void removeItem(String key) {
         if (!order.remove(key) || items.remove(key) == null) {
             throw new IllegalArgumentException("Unable to remove key " + key);

@@ -22,7 +22,7 @@ public class SelectableLayout extends InnerLayout {
         if (selectedOffset>0) {
             selectedOffset--;
             log.info("Selecting up to {}", selectedOffset);
-            invalidate();
+            invalidate(false);
         }
         return selectedOffset;
     }
@@ -31,7 +31,7 @@ public class SelectableLayout extends InnerLayout {
         if (selectedOffset < getHeight() -1) {
             selectedOffset++;
             log.info("Selecting down to {}", selectedOffset);
-            invalidate();
+            invalidate(false);
         }
         return selectedOffset;
     }

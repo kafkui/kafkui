@@ -41,8 +41,8 @@ public class RootLayout implements Layout {
     }
 
     @Override
-    public void invalidate() {
-        display.invalidate();
+    public void invalidate(boolean resizing) {
+        display.invalidate(resizing);
     }
 
     @Override

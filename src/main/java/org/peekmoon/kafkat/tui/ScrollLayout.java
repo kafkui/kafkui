@@ -107,7 +107,7 @@ public class ScrollLayout extends InnerLayout {
     public void makeVisible(int offset) {
         if (offset < offsetY) {
             offsetY = offset;
-            invalidate();
+            invalidate(false);
         }
 
         if (offset >= offsetY + height) {
@@ -126,13 +126,13 @@ public class ScrollLayout extends InnerLayout {
 
     public void scrollUp() {
         offsetY++;
-        invalidate();
+        invalidate(false);
     }
 
     public void scrollDown() {
         if (offsetY>0) {
             offsetY--;
-            invalidate();
+            invalidate(false);
         }
     }
 
