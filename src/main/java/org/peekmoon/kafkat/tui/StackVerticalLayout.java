@@ -22,7 +22,7 @@ public class StackVerticalLayout extends InnerLayout {
     @Override
     public int getWidth() {
         return inners.stream()
-                .map(StackItem::getInner)
+                .map(StackItem::getScrollLayout)
                 .mapToInt(Layout::getWidth)
                 .max().orElse(0);
     }
@@ -30,7 +30,7 @@ public class StackVerticalLayout extends InnerLayout {
     @Override
     public int getHeight() {
         return inners.stream()
-                .map(StackItem::getInner)
+                .map(StackItem::getScrollLayout)
                 .mapToInt(Layout::getHeight)
                 .sum();
     }
@@ -69,17 +69,16 @@ public class StackVerticalLayout extends InnerLayout {
     public AttributedStringBuilder render(int y) {
         int offsetY = 0;
         for (StackItem item : inners) {
-            if (y < offsetY + item.getInner().getHeight()) {
-                return item.getInner().render(y - offsetY);
+            if (y < offsetY + item.getScrollLayout().getHeight()) {
+                return item.getScrollLayout().render(y - offsetY);
             }
-            offsetY += item.getInner().getHeight();
+            offsetY += item.getScrollLayout().getHeight();
         }
         throw new IllegalArgumentException("Unable to render line " + y + " max ofs : " + offsetY + " in " + this);
     }
 
     public void add(InnerLayout innerLayout, StackSizeMode mode, int value) {
-        innerLayout.setParent(this);
-        inners.add(new StackItem(innerLayout, mode, value));
+        inners.add(new StackItem(this, innerLayout, mode, value));
     }
 
 

@@ -11,7 +11,7 @@ public class StackHorizontalLayout extends InnerLayout {
 
     private final static Logger log = LoggerFactory.getLogger(StackHorizontalLayout.class);
 
-    private List<StackItem> inners = new ArrayList<>();
+    private List<StackItem> items = new ArrayList<>();
 
     StackHorizontalLayout(String name) {
         super(name);
@@ -19,17 +19,15 @@ public class StackHorizontalLayout extends InnerLayout {
 
     @Override
     public int getWidth() {
-        return inners.stream()
-                .map(StackItem::getInner)
-                .mapToInt(Layout::getWidth)
+        return items.stream()
+                .mapToInt(StackItem::getWidth)
                 .sum();
     }
 
     @Override
     public int getHeight() {
-        return inners.stream()
-                .map(StackItem::getInner)
-                .mapToInt(Layout::getHeight)
+        return items.stream()
+                .mapToInt(StackItem::getHeight)
                 .max().orElse(0);
     }
 
@@ -41,11 +39,12 @@ public class StackHorizontalLayout extends InnerLayout {
         int totalProportion = 0;
         int nbProportional = 0;
 
-        for (StackItem inner : inners) {
-            switch ( inner.getMode()) {
-                case SIZED -> totalSize += inner.getValue();
+        for (StackItem item : items) {
+            switch ( item.getMode()) {
+                case SIZED -> totalSize += item.getValue();
+                case CONTENT -> totalSize += item.getContentWidth() + 1;
                 case PROPORTIONAL -> {
-                    totalProportion += inner.getValue();
+                    totalProportion += item.getValue();
                     nbProportional ++;
                 }
             }
@@ -53,10 +52,11 @@ public class StackHorizontalLayout extends InnerLayout {
 
         int spaceToShare = width - totalSize;
 
-        for (StackItem inner : inners) {
-            switch (inner.getMode()) {
-                case SIZED -> inner.resize(inner.getValue(), height);
-                case PROPORTIONAL -> inner.resize(spaceToShare * totalProportion / totalProportion, height);
+        for (StackItem item : items) {
+            switch (item.getMode()) {
+                case SIZED -> item.resize(item.getValue(), height);
+                case CONTENT -> item.resize(item.getContentWidth() + 1, height);
+                case PROPORTIONAL -> item.resize(spaceToShare * totalProportion / totalProportion, height);
             }
         }
 
@@ -66,7 +66,7 @@ public class StackHorizontalLayout extends InnerLayout {
     @Override
     public AttributedStringBuilder render(int y) {
         AttributedStringBuilder builder = new AttributedStringBuilder();
-        inners.forEach(l -> builder.append(buildLine(l.getInner(), y)));
+        items.forEach(l -> builder.append(buildLine(l.getScrollLayout(), y)));
         return builder;
     }
 
@@ -76,8 +76,19 @@ public class StackHorizontalLayout extends InnerLayout {
 
 
     public void add(InnerLayout innerLayout, StackSizeMode mode, int value) {
-        innerLayout.setParent(this);
-        inners.add(new StackItem(innerLayout, mode, value));
+        items.add(new StackItem(this, innerLayout, mode, value));
+    }
+
+    public void adjustHeightToContent() {
+        items.forEach(StackItem::adjustHeightToContent);
+    }
+
+    public void adjustWidthTo(StackHorizontalLayout other) {
+        for (int i=0; i< items.size(); i++) {
+            items.get(i).setMinWidth(other.items.get(i).getWidth());
+            items.get(i).setMaxWidth(other.items.get(i).getWidth());
+        }
+
     }
 
 

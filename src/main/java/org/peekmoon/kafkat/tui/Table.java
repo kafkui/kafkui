@@ -14,8 +14,8 @@ public class Table extends InnerLayout {
     private final StackVerticalLayout masterLayout;
     private final ScrollLayout scrollLayout;
     private final SelectableLayout selectableLayout;
-    private final StackHorizontalLayout contentLayout;
-    private final StackHorizontalLayout titlesLayout;
+    private final StackHorizontalLayout stackTitlesLayout;
+    private final StackHorizontalLayout stackContentLayout;
     private final List<Column> columns = new ArrayList<>();
     private final Map<String, Column> columnMap = new HashMap<>();
     private final List<String> keys = new ArrayList<>();
@@ -27,13 +27,13 @@ public class Table extends InnerLayout {
         // Two stack the titles Line + All the content
         this.masterLayout = new StackVerticalLayout("master-Vertical-" + name);
 
-        this.titlesLayout = new StackHorizontalLayout("title-" + name);    // Stack all the columns title
-        this.contentLayout = new StackHorizontalLayout("content-" + name); // Stack all the columns content
+        this.stackTitlesLayout = new StackHorizontalLayout("title-" + name);    // Stack all the columns title
+        this.stackContentLayout = new StackHorizontalLayout("content-" + name); // Stack all the columns content
 
-        this.selectableLayout = new SelectableLayout(contentLayout);
+        this.selectableLayout = new SelectableLayout(stackContentLayout);
         this.scrollLayout = new ScrollLayout(  "scroll-" + getName(), selectableLayout); // All the content (main scroll)
 
-        this.masterLayout.add(titlesLayout, StackSizeMode.SIZED, 1);
+        this.masterLayout.add(stackTitlesLayout, StackSizeMode.SIZED, 1);
         this.masterLayout.add(scrollLayout, StackSizeMode.PROPORTIONAL, 1);
         this.masterLayout.setParent(this);
     }
@@ -56,10 +56,10 @@ public class Table extends InnerLayout {
 
     public void addColumn(String title, HorizontalAlign align, StackSizeMode mode, int value) {
         var col = new Column(title, align);
-        contentLayout.add(col.getLayout(), mode, value);
+        stackTitlesLayout.add(col.getTitleLayout(), mode, value);
+        stackContentLayout.add(col.getContentLayout(), mode, value);
         columns.add(col);
         columnMap.put(title, col);
-        titlesLayout.add(col.getTitleLayout(), mode, value);
     }
 
     public synchronized void putRow(String key, String... cols) {
@@ -72,7 +72,7 @@ public class Table extends InnerLayout {
         for (int noCol = 0; noCol<columns.size(); noCol++) {
             columns.get(noCol).putItem(key, cols[noCol]);
         }
-        resize(masterLayout.getWidth(), masterLayout.getHeight());
+        stackContentLayout.adjustHeightToContent();
         invalidate(true); // TODO : not resize if size don't change
     }
 
@@ -84,6 +84,7 @@ public class Table extends InnerLayout {
            columnMap.forEach((k,c) -> c.putItem(key, "?"));
         }
         column.putItem(key, value);
+        stackContentLayout.adjustHeightToContent();
         invalidate(true); // TODO : not resize if size don't change
     }
 
@@ -93,6 +94,7 @@ public class Table extends InnerLayout {
         }
         keys.remove(key);
         columnMap.values().forEach(c -> c.removeItem(key));
+        stackContentLayout.adjustHeightToContent();
         invalidate(true); // TODO : not resize if size don't change
     }
 
@@ -114,7 +116,7 @@ public class Table extends InnerLayout {
     public void resize(int width, int height) {
         log.debug("Resizing : {} to {},{}", this, width, height);
         masterLayout.resize(width, height);
-        scrollLayout.resize(width, height-1);
+        stackTitlesLayout.adjustWidthTo(stackContentLayout);
         scrollLayout.makeVisible(selectableLayout.getSelectedOffet());
         log.debug("Resized  : {}", this);
     }
@@ -126,34 +128,26 @@ public class Table extends InnerLayout {
 
 
     private class Column {
-        private final ScrollLayout titleLayout;
+        private final ViewLayout titleLayout;
         private final ViewLayout contentLayout;
-        private final ScrollLayout scroller;
-
 
         private Column(String title, HorizontalAlign align) {
-            var titleLayout = new ViewLayout("col-" + title + "-content", align);
-            titleLayout.putItem("Title",title, AttributedStyle.BOLD);
-            this.titleLayout = new ScrollLayout("col-" + title + "-title",titleLayout, align);
+            this.titleLayout = new ViewLayout("col-" + title + "-content", align);
+            titleLayout.putItem("title",title, AttributedStyle.BOLD);
             this.contentLayout = new ViewLayout("col-" + title + "-view", align);
-            this.scroller = new ScrollLayout("col-" + title + "-scroll", contentLayout, align);
-            this.scroller.setMinHeight(0);
-            this.scroller.setMaxHeight(0);
         }
 
-        public InnerLayout getLayout() {
-            return scroller;
-        }
 
         public void putItem(String key, String col) {
             contentLayout.putItem(key, col);
-            scroller.setMinWidth(contentLayout.getWidth());
-            scroller.setMaxHeight(contentLayout.getHeight());
-            scroller.setMinHeight(contentLayout.getHeight());
         }
 
         public void removeItem(String key) {
             contentLayout.removeItem(key);
+        }
+
+        public InnerLayout getContentLayout() {
+            return contentLayout;
         }
 
         public InnerLayout getTitleLayout() {

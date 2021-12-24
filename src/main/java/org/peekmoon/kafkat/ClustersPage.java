@@ -23,7 +23,7 @@ public class ClustersPage extends Page {
     public ClustersPage(Application application) {
         super(application);
         this.table = new Table("clusters");
-        table.addColumn(COL_NAME_CLUSTER_NAME, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
+        table.addColumn(COL_NAME_CLUSTER_NAME, HorizontalAlign.LEFT, StackSizeMode.CONTENT, 10);
         table.addColumn(COL_NAME_BOOTSTRAP, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
     }
 

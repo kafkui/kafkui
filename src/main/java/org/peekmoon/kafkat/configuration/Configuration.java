@@ -24,6 +24,7 @@ public class Configuration {
 //        }
 //    }
 
+    // FIXME: If file does not exists exception
     public static Configuration read() {
         try {
             var userHomeDir = System.getProperty("user.home");
