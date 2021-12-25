@@ -26,13 +26,15 @@ public abstract class Page {
                 }
             } catch (InterruptedException e) {
                 throw new IllegalStateException("Should not be interupted " + Page.this, e);
+            } catch (KException e) {
+                application.status("Error : " + e.getMessage());
             }
         };
     }
 
     abstract String getId();
     abstract InnerLayout getLayout();
-    protected void update(){}
+    protected void update() throws KException {}
 
     abstract KeyMap<Action> getKeyMap(Terminal terminal);
 

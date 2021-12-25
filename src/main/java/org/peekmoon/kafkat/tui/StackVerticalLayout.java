@@ -14,7 +14,7 @@ public class StackVerticalLayout extends InnerLayout {
 
     private List<StackItem> inners = new ArrayList<>();
 
-    StackVerticalLayout(String name) {
+    public StackVerticalLayout(String name) {
         super(name);
     }
 

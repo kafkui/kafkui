@@ -9,11 +9,7 @@ import org.peekmoon.kafkat.action.Action;
 import org.peekmoon.kafkat.action.ExitAction;
 import org.peekmoon.kafkat.action.VoidAction;
 import org.peekmoon.kafkat.configuration.ClusterConfiguration;
-import org.peekmoon.kafkat.configuration.Configuration;
-import org.peekmoon.kafkat.tui.Display;
-import org.peekmoon.kafkat.tui.FrameLayout;
-import org.peekmoon.kafkat.tui.InnerLayout;
-import org.peekmoon.kafkat.tui.SwitchLayout;
+import org.peekmoon.kafkat.tui.*;
 import org.peekmoon.kafkat.utils.LogInitializer;
 import org.peekmoon.kafkat.utils.UncaughtExceptionHandler;
 import org.slf4j.Logger;
@@ -45,11 +41,11 @@ public class Application  {
     private boolean askQuit = false;
     private KeyboardController keyboardController;
     private SwitchLayout switchLayout;
+    private ViewLayout statusLineLayout;
     private ClustersPage clustersPage;
     private Page currentPage;
 
     public void run() {
-
         log.info("Starting app's");
 
         // Set a default handler to log all exceptions
@@ -93,6 +89,8 @@ public class Application  {
     public Admin openKafkaAdmin(ClusterConfiguration cluster) {
         Properties config = new Properties();
         config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.bootstrapServers);
+        config.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 5* 1000);
+        config.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, 5 * 1000);
         return Admin.create(config);
     }
 
@@ -113,8 +111,12 @@ public class Application  {
     private InnerLayout buildLayout() {
         this.clustersPage = new ClustersPage(this);
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
-        var mainLayout = new FrameLayout("FrameAroundMainSwitch", switchLayout);
         switchLayout.add(clustersPage.getId(), clustersPage.getLayout());
+
+        var mainLayout = new StackVerticalLayout("MainLayout");
+        mainLayout.add(new FrameLayout("FrameAroundMainSwitch", switchLayout), StackSizeMode.PROPORTIONAL, 1);
+        statusLineLayout = new ViewLayout("StatusLine");
+        mainLayout.add(statusLineLayout, StackSizeMode.SIZED, 1);
         return mainLayout;
     }
 
@@ -128,4 +130,7 @@ public class Application  {
         return keyMap;
     }
 
+    public void status(String msg) {
+        statusLineLayout.putItem("0", msg);
+    }
 }

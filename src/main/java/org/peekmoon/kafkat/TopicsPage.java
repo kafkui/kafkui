@@ -53,15 +53,6 @@ public class TopicsPage extends Page {
         return table;
     }
 
-    @Override
-    public void activate() {
-        update();
-    }
-
-    @Override
-    public void deactivate() {
-
-    }
 
     @Override
     public KeyMap<Action> getKeyMap(Terminal terminal) {
@@ -75,9 +66,10 @@ public class TopicsPage extends Page {
         return table.getCurrentSelection();
     }
 
-    public void update()  {
+    public void update() throws KException {
 
         try {
+            application.status("Listing topics...");
             var topicListing = kafkaAdmin.listTopics().listings().get();
 
             var configResourceList = new ArrayList<ConfigResource>();
@@ -94,7 +86,10 @@ public class TopicsPage extends Page {
                     kafkaAdmin.describeConfigs(configResourceList).all().thenApply(this::updateTopicsConfig)
             ).get();
 
-        } catch (ExecutionException | InterruptedException e) {
+        } catch(ExecutionException e) {
+            throw new KException(e.getCause());
+        }
+        catch (InterruptedException e) {
             throw new IllegalStateException("Unable to retrieve topics data", e);
         }
 
