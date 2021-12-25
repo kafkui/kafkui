@@ -88,9 +88,10 @@ public class TopicsPage extends Page {
 
         } catch(ExecutionException e) {
             throw new KException(e.getCause());
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new IllegalStateException("Unable to retrieve topics data", e);
+        } finally {
+            application.clearStatus();
         }
 
     }

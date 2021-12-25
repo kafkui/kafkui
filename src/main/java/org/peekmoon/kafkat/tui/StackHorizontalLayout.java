@@ -13,7 +13,7 @@ public class StackHorizontalLayout extends InnerLayout {
 
     private List<StackItem> items = new ArrayList<>();
 
-    StackHorizontalLayout(String name) {
+    public StackHorizontalLayout(String name) {
         super(name);
     }
 

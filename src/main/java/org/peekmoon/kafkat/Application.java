@@ -30,9 +30,7 @@ public class Application  {
 
     private final static Logger log = LoggerFactory.getLogger(Application.class.getName());
 
-
     public static void main(String[] args) {
-
         new Application().run();
     }
 
@@ -41,9 +39,10 @@ public class Application  {
     private boolean askQuit = false;
     private KeyboardController keyboardController;
     private SwitchLayout switchLayout;
-    private ViewLayout statusLineLayout;
+    private ViewLayout statusMessageLayout;
     private ClustersPage clustersPage;
     private Page currentPage;
+    private ProcessingIndicator processingIndicator;
 
     public void run() {
         log.info("Starting app's");
@@ -77,7 +76,6 @@ public class Application  {
                 log.info("Receiving an new action {}/{}", action, actions.size());
                 action.apply();
             }
-            currentPage.deactivate();
 
         } catch (IOException | InterruptedException e) {
             throw new IllegalStateException(e);
@@ -106,18 +104,31 @@ public class Application  {
 
     public void exit() {
         askQuit = true;
+        currentPage.deactivate();
     }
 
     private InnerLayout buildLayout() {
-        this.clustersPage = new ClustersPage(this);
         this.switchLayout = new SwitchLayout("MainPageSwitcher");
-        switchLayout.add(clustersPage.getId(), clustersPage.getLayout());
 
+        // Two vertical layout 1/Main content 2/StatusLine
         var mainLayout = new StackVerticalLayout("MainLayout");
         mainLayout.add(new FrameLayout("FrameAroundMainSwitch", switchLayout), StackSizeMode.PROPORTIONAL, 1);
-        statusLineLayout = new ViewLayout("StatusLine");
-        mainLayout.add(statusLineLayout, StackSizeMode.SIZED, 1);
+        mainLayout.add(buildStatusLine(), StackSizeMode.SIZED, 1);
+
+        this.clustersPage = new ClustersPage(this);
+        switchLayout.add(clustersPage.getId(), clustersPage.getLayout());
+
         return mainLayout;
+    }
+
+    // Status line = 2 horizontals : indicator + message
+    private InnerLayout buildStatusLine() {
+        statusMessageLayout = new ViewLayout("StatusLine");
+        var statusLine = new StackHorizontalLayout("StatusLine");
+        processingIndicator = new ProcessingIndicator();
+        statusLine.add(processingIndicator.getLayout(), StackSizeMode.SIZED, 2);
+        statusLine.add(statusMessageLayout, StackSizeMode.PROPORTIONAL, 1);
+        return statusLine;
     }
 
 
@@ -131,6 +142,16 @@ public class Application  {
     }
 
     public void status(String msg) {
-        statusLineLayout.putItem("0", msg);
+        statusMessageLayout.putItem("0", msg);
     }
+
+    public void clearStatus() {
+        statusMessageLayout.removeItem("0");
+    }
+
+    public ProcessingIndicator getProcessingIndicator() {
+        return processingIndicator;
+    }
+
+
 }

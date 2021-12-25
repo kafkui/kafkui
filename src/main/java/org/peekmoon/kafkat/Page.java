@@ -10,22 +10,29 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class Page {
 
     protected final Application application;
+    protected final ProcessingIndicator processingIndicator;
     private Thread thread;
     private AtomicBoolean askStop = new AtomicBoolean(false);
 
     protected Page(Application application) {
         this.application = application;
+        this.processingIndicator = application.getProcessingIndicator();
     }
 
     protected Runnable getUpdateRunnable(AtomicBoolean askStop) {
         return () -> {
             try {
                 while (!askStop.get()) {
-                    this.update();
-                    Thread.sleep(1500);
+                    processingIndicator.start(this);
+                    try {
+                        this.update();
+                    } finally {
+                        processingIndicator.stop(this);
+                    }
+                    Thread.sleep(2500);
                 }
             } catch (InterruptedException e) {
-                throw new IllegalStateException("Should not be interupted " + Page.this, e);
+                throw new IllegalStateException("Should not be interrupted if not asking stop" + Page.this, e);
             } catch (KException e) {
                 application.status("Error : " + e.getMessage());
             }
@@ -47,7 +54,11 @@ public abstract class Page {
     }
 
     void deactivate() {
-            askStop.set(true);
-            thread = null;
+        askStop.set(true);
+        thread = null;
+    }
+
+    public boolean isActive() {
+        return thread != null;
     }
 }
