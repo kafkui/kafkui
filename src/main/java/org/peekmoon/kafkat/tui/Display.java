@@ -59,16 +59,14 @@ public class Display implements Runnable, Closeable {
             do {
                 event = events.take();
                 log.debug("Event : {}/{}", event, events.size());
-                synchronized (this) {
-                    switch (event) {
-                        case RESIZE_AND_REDRAW -> {
-                            resize();
-                            redraw();
-                        }
-                        case REDRAW -> redraw();
+                switch (event) {
+                    case RESIZE_AND_REDRAW -> {
+                        resize();
+                        redraw();
                     }
-                    log.debug("Event done");
+                    case REDRAW -> redraw();
                 }
+                log.debug("Event done");
             } while (event != Event.STOP);
 
         } catch(InterruptedException e){

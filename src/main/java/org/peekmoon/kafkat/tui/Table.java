@@ -55,9 +55,7 @@ public class Table extends InnerLayout {
     }
 
     public void addColumn(String title, HorizontalAlign align, StackSizeMode mode, int value) {
-        var col = new Column(title, align);
-        stackTitlesLayout.add(col.getTitleLayout(), mode, value);
-        stackContentLayout.add(col.getContentLayout(), mode, value);
+        var col = new Column(title, align, mode, value);
         columns.add(col);
         columnMap.put(title, col);
     }
@@ -67,13 +65,14 @@ public class Table extends InnerLayout {
             throw new IllegalArgumentException("Bad col number " + cols.length + " != " + columns.size());
         }
 
-        if (!keys.contains(key)) keys.add(key);
+        if (!keys.contains(key)) {
+            keys.add(key);
+        }
 
         for (int noCol = 0; noCol<columns.size(); noCol++) {
             columns.get(noCol).putItem(key, cols[noCol]);
         }
         stackContentLayout.adjustHeightToContent();
-        invalidate(true); // TODO : not resize if size don't change
     }
 
     public synchronized void putValue(String key, String colName, String value) {
@@ -85,7 +84,6 @@ public class Table extends InnerLayout {
         }
         column.putItem(key, value);
         stackContentLayout.adjustHeightToContent();
-        invalidate(true); // TODO : not resize if size don't change
     }
 
     public synchronized void removeRow(String key) {
@@ -95,7 +93,6 @@ public class Table extends InnerLayout {
         keys.remove(key);
         columnMap.values().forEach(c -> c.removeItem(key));
         stackContentLayout.adjustHeightToContent();
-        invalidate(true); // TODO : not resize if size don't change
     }
 
     public synchronized int length() {
@@ -131,12 +128,14 @@ public class Table extends InnerLayout {
         private final ViewLayout titleLayout;
         private final ViewLayout contentLayout;
 
-        private Column(String title, HorizontalAlign align) {
+        private Column(String title, HorizontalAlign align,  StackSizeMode mode, int value) {
             this.titleLayout = new ViewLayout("col-" + title + "-content", align);
-            titleLayout.putItem("title",title, AttributedStyle.BOLD);
             this.contentLayout = new ViewLayout("col-" + title + "-view", align);
-        }
+            stackTitlesLayout.add(titleLayout, mode, value);
+            stackContentLayout.add(contentLayout, mode, value);
+            titleLayout.putItem("title",title, AttributedStyle.BOLD);
 
+        }
 
         public void putItem(String key, String col) {
             contentLayout.putItem(key, col);
@@ -146,13 +145,6 @@ public class Table extends InnerLayout {
             contentLayout.removeItem(key);
         }
 
-        public InnerLayout getContentLayout() {
-            return contentLayout;
-        }
-
-        public InnerLayout getTitleLayout() {
-            return titleLayout;
-        }
     }
 
 

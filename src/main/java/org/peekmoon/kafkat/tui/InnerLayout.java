@@ -14,7 +14,9 @@ public abstract class InnerLayout implements Layout {
 
     @Override
     public void invalidate(boolean resizing) {
-        getParent().invalidate(resizing);
+        if (parent != null) { // If no parent, we ignoring the event, no need to redraw
+            parent.invalidate(resizing);
+        }
     }
 
     @Override
@@ -27,13 +29,6 @@ public abstract class InnerLayout implements Layout {
             throw new IllegalStateException("Reparenting is not supported");
         }
         this.parent = parent;
-    }
-
-    private Layout getParent() {
-        if (parent == null) {
-            throw new IllegalStateException("Parent has not been initialized for " + this);
-        }
-        return parent;
     }
 
     protected AttributedStringBuilder emptyLine() {

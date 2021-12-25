@@ -66,22 +66,22 @@ public class ViewLayout extends InnerLayout {
         putItem(key, value, AttributedStyle.DEFAULT);
     }
 
-    // FIXME : Synchronize with rezising and drawing
-
     /***
      * Add an item to this viewLayout, synchronizing same width, based on longest item, on all inner viewItem
      */
     public synchronized void putItem(String key, String value, AttributedStyle style) {
+        boolean resizing = false;
+
         // Add item to structure
         var item = items.get(key);
         if (item == null) {
             item = new ViewItem(this, key, value, style);
             items.put(key, item);
             order.add(key);
+            resizing = true;
         } else {
             item.setValue(value);
         }
-
 
         // Update new layout width
         var newItemContentWidth = item.getContentWidth();
@@ -89,23 +89,26 @@ public class ViewLayout extends InnerLayout {
             longestItem = item;
             items.values().forEach(i -> i.setWidth(newItemContentWidth)); // Update width of all
             width = newItemContentWidth;
-        } else  if (key.equals(longestItem.getKey())) { // We are reducing the longst item
+            resizing = true;
+        } else if (newItemContentWidth < width && key.equals(longestItem.getKey())) { // We are reducing the longest item
             // Find the new longest one
             longestItem = items.values().stream().max(Comparator.comparingInt(ViewItem::getContentWidth)).get();
             int newMaxContentWidth = longestItem.getContentWidth();
             items.values().forEach(i -> i.setWidth(newMaxContentWidth)); // Update width of all
             width = newMaxContentWidth;
+            resizing = true;
         } else {
             item.setWidth(width);
         }
+        invalidate(resizing);
 
     }
 
-    // FIXME: Resize when remove longest item
     public synchronized void removeItem(String key) {
         if (!order.remove(key) || items.remove(key) == null) {
             throw new IllegalArgumentException("Unable to remove key " + key);
         }
+        invalidate(true);
 
     }
 
