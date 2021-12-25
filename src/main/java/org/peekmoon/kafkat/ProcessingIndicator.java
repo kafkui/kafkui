@@ -37,7 +37,7 @@ public class ProcessingIndicator extends TimerTask {
     public synchronized void stop(Page askingPage) {
         if (askingPage.isActive()) {
             animating = false;
-            layout.removeItem("0");
+            layout.putItem("0", " "); // We do not remove item to not throw a resizing
         }
     }
 
