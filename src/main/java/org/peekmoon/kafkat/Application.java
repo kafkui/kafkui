@@ -123,7 +123,7 @@ public class Application  {
 
     // Status line = 2 horizontals : indicator + message
     private InnerLayout buildStatusLine() {
-        statusMessageLayout = new ViewLayout("StatusLine");
+        statusMessageLayout = new ViewLayout("StatusLineMessage");
         var statusLine = new StackHorizontalLayout("StatusLine");
         processingIndicator = new ProcessingIndicator();
         statusLine.add(processingIndicator.getLayout(), StackSizeMode.SIZED, 2);

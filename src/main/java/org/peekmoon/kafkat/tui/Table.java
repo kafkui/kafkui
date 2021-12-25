@@ -72,7 +72,6 @@ public class Table extends InnerLayout {
         for (int noCol = 0; noCol<columns.size(); noCol++) {
             columns.get(noCol).putItem(key, cols[noCol]);
         }
-        stackContentLayout.adjustHeightToContent();
     }
 
     public synchronized void putValue(String key, String colName, String value) {
@@ -83,7 +82,6 @@ public class Table extends InnerLayout {
            columnMap.forEach((k,c) -> c.putItem(key, "?"));
         }
         column.putItem(key, value);
-        stackContentLayout.adjustHeightToContent();
     }
 
     public synchronized void removeRow(String key) {
@@ -92,7 +90,6 @@ public class Table extends InnerLayout {
         }
         keys.remove(key);
         columnMap.values().forEach(c -> c.removeItem(key));
-        stackContentLayout.adjustHeightToContent();
     }
 
     public synchronized int length() {
@@ -134,7 +131,6 @@ public class Table extends InnerLayout {
             stackTitlesLayout.add(titleLayout, mode, value);
             stackContentLayout.add(contentLayout, mode, value);
             titleLayout.putItem("title",title, AttributedStyle.BOLD);
-
         }
 
         public void putItem(String key, String col) {

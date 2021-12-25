@@ -59,6 +59,7 @@ public class StackHorizontalLayout extends InnerLayout {
                 case PROPORTIONAL -> item.resize(spaceToShare * totalProportion / totalProportion, height);
             }
         }
+        adjustHeightToContent();
 
         log.debug("Resized  : {}", this);
     }
@@ -79,7 +80,7 @@ public class StackHorizontalLayout extends InnerLayout {
         items.add(new StackItem(this, innerLayout, mode, value));
     }
 
-    public void adjustHeightToContent() {
+    private void adjustHeightToContent() {
         items.forEach(StackItem::adjustHeightToContent);
     }
 
