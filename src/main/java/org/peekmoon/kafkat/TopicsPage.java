@@ -6,6 +6,7 @@ import org.apache.kafka.common.config.ConfigResource;
 import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
 import org.peekmoon.kafkat.action.Action;
+import org.peekmoon.kafkat.action.SwitchToPageAction;
 import org.peekmoon.kafkat.action.SwitchToRecordsAction;
 import org.peekmoon.kafkat.tui.StackSizeMode;
 import org.peekmoon.kafkat.tui.Table;
@@ -27,10 +28,12 @@ public class TopicsPage extends Page {
 
     private final Admin kafkaAdmin;
     private final Table table;
+    private final ClustersPage clustersPage;
 
-    public TopicsPage(Application application, Admin kafkaAdmim) {
+    public TopicsPage(Application application, Admin kafkaAdmim, ClustersPage clustersPage) {
         super(application);
         this.kafkaAdmin = kafkaAdmim;
+        this.clustersPage = clustersPage;
         this.table = new Table("topics");
         table.addColumn(COL_NAME_TOPIC_NAME, HorizontalAlign.LEFT, StackSizeMode.PROPORTIONAL, 1);
         table.addColumn(COL_NAME_NB_PARTITION, HorizontalAlign.LEFT, StackSizeMode.SIZED, 5);
@@ -59,6 +62,7 @@ public class TopicsPage extends Page {
         var keyMap = new KeyMap<Action>();
         TableKeyMapProvider.fill(table, keyMap, terminal);
         keyMap.bind(new SwitchToRecordsAction(application, this), "\r");
+        keyMap.bind(new SwitchToPageAction(application, clustersPage), KeyMap.esc(), KeyMap.del() );
         return keyMap;
     }
 

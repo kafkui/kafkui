@@ -56,11 +56,11 @@ public class ClustersPage extends Page {
     KeyMap<Action> getKeyMap(Terminal terminal) {
         var keyMap = new KeyMap<Action>();
         TableKeyMapProvider.fill(table, keyMap, terminal);
-        keyMap.bind(new OpenClusterAction(application, this::getCurrentCluster), "\r");
+        keyMap.bind(new OpenClusterAction(application, this), "\r");
         return keyMap;
     }
 
-    ClusterConfiguration getCurrentCluster() {
+    public ClusterConfiguration getCurrentCluster() {
         int clusterIdx = Integer.parseInt(table.getCurrentSelection());
         return clusters.get(clusterIdx);
     }
