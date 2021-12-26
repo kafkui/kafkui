@@ -4,6 +4,7 @@ import org.jline.keymap.KeyMap;
 import org.jline.terminal.Terminal;
 import org.peekmoon.kafkat.action.Action;
 import org.peekmoon.kafkat.action.SwitchToPageAction;
+import org.peekmoon.kafkat.configuration.ClusterConfiguration;
 import org.peekmoon.kafkat.tui.HorizontalAlign;
 import org.peekmoon.kafkat.tui.InnerLayout;
 import org.peekmoon.kafkat.tui.StackSizeMode;
@@ -20,11 +21,13 @@ public class RecordPage extends Page {
     private final String topic;
     private final TopicsPage topicsPage;
     private final Table table;
+    private final ClusterConfiguration clusterConfiguration;
 
 
     public RecordPage(Application application, TopicsPage topicsPage) {
         super(application);
         this.topicsPage = topicsPage;
+        this.clusterConfiguration = application.getCurrentClusterConfiguration();
         this.topic = topicsPage.getCurrentTopic();
         this.table = new Table("records");
         table.addColumn(COL_NAME_PARTITION, HorizontalAlign.LEFT, StackSizeMode.SIZED, 10);
@@ -48,7 +51,7 @@ public class RecordPage extends Page {
 
     @Override
     protected Runnable getUpdateRunnable(AtomicBoolean askStop) {
-        return new ConsumerThread(topic, table, askStop);
+        return new ConsumerThread(clusterConfiguration, topic, table, askStop);
     }
 
     public InnerLayout getLayout() {

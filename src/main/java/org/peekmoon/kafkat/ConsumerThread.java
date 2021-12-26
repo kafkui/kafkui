@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.InterruptException;
+import org.peekmoon.kafkat.configuration.ClusterConfiguration;
 import org.peekmoon.kafkat.tui.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +18,13 @@ public class ConsumerThread implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(ConsumerThread.class);
 
+    private final ClusterConfiguration configuration;
     private final String topic;
     private final Table table;
     private final AtomicBoolean askStop;
 
-    public ConsumerThread(String topic, Table table, AtomicBoolean askStop) {
+    public ConsumerThread(ClusterConfiguration configuration, String topic, Table table, AtomicBoolean askStop) {
+        this.configuration = configuration;
         this.topic = topic;
         this.table = table;
         this.askStop = askStop;
@@ -31,7 +34,7 @@ public class ConsumerThread implements Runnable {
     public void run() {
 
         Properties props = new Properties();
-        props.setProperty("bootstrap.servers", "breisen.datamix.ovh:9093");
+        props.setProperty("bootstrap.servers", configuration.bootstrapServersAsString());
         props.setProperty("group.id", "test");
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

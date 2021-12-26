@@ -154,4 +154,7 @@ public class Application  {
     }
 
 
+    public ClusterConfiguration getCurrentClusterConfiguration() {
+        return clustersPage.getCurrentCluster();
+    }
 }

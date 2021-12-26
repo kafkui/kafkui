@@ -7,16 +7,16 @@ import org.peekmoon.kafkat.TopicsPage;
 public class SwitchToRecordsAction implements Action {
 
     private final Application application;
-    private final TopicsPage topcisPage;
+    private final TopicsPage topicsPage;
 
-    public SwitchToRecordsAction(Application application, TopicsPage topcisPage) {
+    public SwitchToRecordsAction(Application application, TopicsPage topicsPage) {
         this.application = application;
-        this.topcisPage = topcisPage;
+        this.topicsPage = topicsPage;
     }
 
     @Override
     public void apply() {
-        var recordPage = new RecordPage(application, topcisPage);
+        var recordPage = new RecordPage(application, topicsPage);
         application.switchPage(recordPage);
     }
 }

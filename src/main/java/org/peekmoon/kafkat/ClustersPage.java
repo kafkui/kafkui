@@ -60,7 +60,7 @@ public class ClustersPage extends Page {
         return keyMap;
     }
 
-    private ClusterConfiguration getCurrentCluster() {
+    ClusterConfiguration getCurrentCluster() {
         int clusterIdx = Integer.parseInt(table.getCurrentSelection());
         return clusters.get(clusterIdx);
     }
