@@ -1,11 +1,11 @@
 [
   {
-    "name": "org.peekmoon.kafkat.configuration.Configuration",
+    "name": "org.peekmoon.kafkui.configuration.Configuration",
     "methods":[{"name":"<init>","parameterTypes":[] }],
     "allDeclaredFields": true
   },
   {
-    "name": "org.peekmoon.kafkat.configuration.ClusterConfiguration",
+    "name": "org.peekmoon.kafkui.configuration.ClusterConfiguration",
     "methods":[{"name":"<init>","parameterTypes":[] }],
     "allDeclaredFields": true
   },
